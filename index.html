@@ -1,0 +1,421 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>异动追踪 - 桥洞</title>
+  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+  <style>
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+    body { 
+      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+      background: #0d1117; color: #c9d1d9; padding: 20px;
+    }
+    .container { max-width: 1200px; margin: 0 auto; }
+    h1 { color: #58a6ff; margin-bottom: 20px; }
+    .coin-list { display: grid; gap: 15px; }
+    .coin-card {
+      background: #161b22; border: 1px solid #30363d; border-radius: 8px;
+      padding: 15px; cursor: pointer; transition: all 0.2s;
+    }
+    .coin-card:hover { border-color: #58a6ff; transform: translateY(-2px); }
+    .coin-header { display: flex; justify-content: space-between; align-items: center; }
+    .coin-name { font-size: 24px; font-weight: bold; color: #fff; }
+    .coin-change { font-size: 20px; font-weight: bold; }
+    .coin-change.up { color: #3fb950; }
+    .coin-change.down { color: #f85149; }
+    .coin-meta { margin-top: 10px; color: #8b949e; font-size: 14px; }
+    
+    /* 详情页 */
+    .detail-view { display: none; }
+    .detail-view.active { display: block; }
+    .back-btn {
+      background: #21262d; border: 1px solid #30363d; color: #c9d1d9;
+      padding: 8px 16px; border-radius: 6px; cursor: pointer; margin-bottom: 20px;
+    }
+    .back-btn:hover { background: #30363d; }
+    .detail-header { margin-bottom: 20px; }
+    .detail-header h2 { color: #fff; font-size: 32px; }
+    .detail-stats { display: grid; grid-template-columns: repeat(auto-fit, minmax(150px, 1fr)); gap: 15px; margin-bottom: 20px; }
+    .stat-box { background: #161b22; border: 1px solid #30363d; border-radius: 8px; padding: 15px; }
+    .stat-label { color: #8b949e; font-size: 12px; margin-bottom: 5px; }
+    .stat-value { color: #fff; font-size: 20px; font-weight: bold; }
+    .stat-value.up { color: #3fb950; }
+    .stat-value.down { color: #f85149; }
+    
+    .charts { display: grid; grid-template-columns: 1fr 1fr; gap: 20px; }
+    @media (max-width: 768px) { .charts { grid-template-columns: 1fr; } }
+    .chart-box { background: #161b22; border: 1px solid #30363d; border-radius: 8px; padding: 15px; }
+    .chart-title { color: #8b949e; font-size: 14px; margin-bottom: 10px; }
+    
+    .no-data { text-align: center; padding: 50px; color: #8b949e; }
+    .loading { text-align: center; padding: 50px; }
+    .update-time { color: #8b949e; font-size: 12px; margin-top: 20px; text-align: right; }
+    
+    /* 分析结论 */
+    .analysis { background: #161b22; border: 1px solid #30363d; border-radius: 8px; padding: 15px; margin-top: 20px; }
+    .analysis h3 { color: #58a6ff; margin-bottom: 10px; }
+    .analysis p { line-height: 1.6; }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <!-- 列表页 -->
+    <div id="list-view">
+      <h1>🔍 异动追踪</h1>
+      <div id="coin-list" class="coin-list">
+        <div class="loading">加载中...</div>
+      </div>
+    </div>
+    
+    <!-- 详情页 -->
+    <div id="detail-view" class="detail-view">
+      <button class="back-btn" onclick="showList()">← 返回列表</button>
+      <div class="detail-header">
+        <h2 id="detail-title">-</h2>
+      </div>
+      <div class="detail-stats" id="detail-stats"></div>
+      <div class="charts">
+        <div class="chart-box">
+          <div class="chart-title">价格 & OI</div>
+          <canvas id="chart-price-oi"></canvas>
+        </div>
+        <div class="chart-box">
+          <div class="chart-title">大户多空比</div>
+          <canvas id="chart-long-short"></canvas>
+        </div>
+        <div class="chart-box">
+          <div class="chart-title">主动买卖比</div>
+          <canvas id="chart-taker"></canvas>
+        </div>
+        <div class="chart-box">
+          <div class="chart-title">资金费率</div>
+          <canvas id="chart-funding"></canvas>
+        </div>
+      </div>
+      <div class="analysis" id="analysis"></div>
+      <div class="update-time" id="update-time"></div>
+    </div>
+  </div>
+
+  <script>
+    const DATA_BASE = './data';
+    let charts = {};
+    let refreshTimer = null;
+    
+    // 初始化
+    async function init() {
+      const urlParams = new URLSearchParams(window.location.search);
+      const symbol = urlParams.get('coin');
+      
+      if (symbol) {
+        await showDetail(symbol + 'USDT');
+      } else {
+        await loadList();
+      }
+    }
+    
+    // 加载列表
+    async function loadList() {
+      try {
+        const resp = await fetch(`${DATA_BASE}/index.json?t=${Date.now()}`);
+        const data = await resp.json();
+        
+        const listEl = document.getElementById('coin-list');
+        
+        if (!data.coins || data.coins.length === 0) {
+          listEl.innerHTML = '<div class="no-data">暂无异动追踪<br><br>当检测到15分钟涨跌幅超过12%的币种时，将自动开始追踪</div>';
+          return;
+        }
+        
+        listEl.innerHTML = data.coins.map(coin => {
+          const symbol = coin.symbol.replace('USDT', '');
+          const change = parseFloat(coin.trigger.change15m);
+          const isUp = change > 0;
+          return `
+            <div class="coin-card" onclick="showDetail('${coin.symbol}')">
+              <div class="coin-header">
+                <span class="coin-name">${symbol}</span>
+                <span class="coin-change ${isUp ? 'up' : 'down'}">${isUp ? '+' : ''}${change}%</span>
+              </div>
+              <div class="coin-meta">
+                价格: $${coin.trigger.price} | 
+                触发时间: ${new Date(coin.startTime).toLocaleTimeString()}
+              </div>
+            </div>
+          `;
+        }).join('');
+        
+      } catch (e) {
+        document.getElementById('coin-list').innerHTML = '<div class="no-data">加载失败: ' + e.message + '</div>';
+      }
+    }
+    
+    // 显示详情
+    async function showDetail(symbol) {
+      document.getElementById('list-view').style.display = 'none';
+      document.getElementById('detail-view').classList.add('active');
+      
+      // 更新 URL
+      const coinName = symbol.replace('USDT', '');
+      history.pushState({}, '', `?coin=${coinName}`);
+      
+      await loadDetail(symbol);
+      
+      // 定时刷新
+      if (refreshTimer) clearInterval(refreshTimer);
+      refreshTimer = setInterval(() => loadDetail(symbol), 30000);
+    }
+    
+    // 加载详情数据
+    async function loadDetail(symbol) {
+      try {
+        const resp = await fetch(`${DATA_BASE}/${symbol}.json?t=${Date.now()}`);
+        const data = await resp.json();
+        
+        const coinName = symbol.replace('USDT', '');
+        document.getElementById('detail-title').textContent = `${coinName} 异动追踪`;
+        
+        // 统计数据
+        const latest = data.history[data.history.length - 1] || {};
+        const first = data.history[0] || {};
+        
+        const priceChange = latest.price && first.price 
+          ? ((parseFloat(latest.price) - parseFloat(first.price)) / parseFloat(first.price) * 100).toFixed(2)
+          : '-';
+        
+        const oiChange = latest.oi && first.oi
+          ? ((parseFloat(latest.oi.usd) - parseFloat(first.oi.usd)) / parseFloat(first.oi.usd) * 100).toFixed(2)
+          : '-';
+        
+        document.getElementById('detail-stats').innerHTML = `
+          <div class="stat-box">
+            <div class="stat-label">当前价格</div>
+            <div class="stat-value">$${latest.price || '-'}</div>
+          </div>
+          <div class="stat-box">
+            <div class="stat-label">追踪期间涨跌</div>
+            <div class="stat-value ${parseFloat(priceChange) > 0 ? 'up' : 'down'}">${priceChange}%</div>
+          </div>
+          <div class="stat-box">
+            <div class="stat-label">OI (USD)</div>
+            <div class="stat-value">$${latest.oi ? (parseFloat(latest.oi.usd)/1000000).toFixed(2) + 'M' : '-'}</div>
+          </div>
+          <div class="stat-box">
+            <div class="stat-label">OI 变化</div>
+            <div class="stat-value ${parseFloat(oiChange) > 0 ? 'up' : 'down'}">${oiChange}%</div>
+          </div>
+          <div class="stat-box">
+            <div class="stat-label">大户多头</div>
+            <div class="stat-value">${latest.longShort ? (parseFloat(latest.longShort.long) * 100).toFixed(1) + '%' : '-'}</div>
+          </div>
+          <div class="stat-box">
+            <div class="stat-label">主动买卖比</div>
+            <div class="stat-value">${latest.taker ? latest.taker.ratio : '-'}</div>
+          </div>
+        `;
+        
+        // 绘制图表
+        renderCharts(data);
+        
+        // 生成分析
+        generateAnalysis(data);
+        
+        document.getElementById('update-time').textContent = 
+          `最后更新: ${new Date(data.lastUpdate).toLocaleString()}`;
+          
+      } catch (e) {
+        console.error('加载详情失败:', e);
+      }
+    }
+    
+    // 绘制图表
+    function renderCharts(data) {
+      const history = data.history;
+      const labels = history.map(h => new Date(h.time).toLocaleTimeString());
+      
+      // 销毁旧图表
+      Object.values(charts).forEach(c => c.destroy());
+      charts = {};
+      
+      // 价格 & OI
+      charts.priceOi = new Chart(document.getElementById('chart-price-oi'), {
+        type: 'line',
+        data: {
+          labels,
+          datasets: [
+            {
+              label: '价格',
+              data: history.map(h => parseFloat(h.price)),
+              borderColor: '#58a6ff',
+              yAxisID: 'y',
+              tension: 0.1
+            },
+            {
+              label: 'OI (M)',
+              data: history.map(h => h.oi ? parseFloat(h.oi.usd) / 1000000 : null),
+              borderColor: '#f0883e',
+              yAxisID: 'y1',
+              tension: 0.1
+            }
+          ]
+        },
+        options: {
+          responsive: true,
+          scales: {
+            y: { position: 'left', grid: { color: '#30363d' } },
+            y1: { position: 'right', grid: { display: false } }
+          },
+          plugins: { legend: { labels: { color: '#c9d1d9' } } }
+        }
+      });
+      
+      // 大户多空比
+      charts.longShort = new Chart(document.getElementById('chart-long-short'), {
+        type: 'line',
+        data: {
+          labels,
+          datasets: [
+            {
+              label: '多头 %',
+              data: history.map(h => h.longShort ? parseFloat(h.longShort.long) * 100 : null),
+              borderColor: '#3fb950',
+              fill: true,
+              backgroundColor: 'rgba(63, 185, 80, 0.1)'
+            },
+            {
+              label: '空头 %',
+              data: history.map(h => h.longShort ? parseFloat(h.longShort.short) * 100 : null),
+              borderColor: '#f85149',
+              fill: true,
+              backgroundColor: 'rgba(248, 81, 73, 0.1)'
+            }
+          ]
+        },
+        options: {
+          responsive: true,
+          scales: { y: { grid: { color: '#30363d' } } },
+          plugins: { legend: { labels: { color: '#c9d1d9' } } }
+        }
+      });
+      
+      // 主动买卖比
+      charts.taker = new Chart(document.getElementById('chart-taker'), {
+        type: 'bar',
+        data: {
+          labels,
+          datasets: [{
+            label: '买卖比',
+            data: history.map(h => h.taker ? parseFloat(h.taker.ratio) : null),
+            backgroundColor: history.map(h => {
+              if (!h.taker) return '#30363d';
+              return parseFloat(h.taker.ratio) > 1 ? '#3fb950' : '#f85149';
+            })
+          }]
+        },
+        options: {
+          responsive: true,
+          scales: { y: { grid: { color: '#30363d' } } },
+          plugins: { legend: { labels: { color: '#c9d1d9' } } }
+        }
+      });
+      
+      // 资金费率
+      charts.funding = new Chart(document.getElementById('chart-funding'), {
+        type: 'line',
+        data: {
+          labels,
+          datasets: [{
+            label: '资金费率',
+            data: history.map(h => h.funding ? parseFloat(h.funding) * 100 : null),
+            borderColor: '#a371f7',
+            tension: 0.1
+          }]
+        },
+        options: {
+          responsive: true,
+          scales: { y: { grid: { color: '#30363d' } } },
+          plugins: { legend: { labels: { color: '#c9d1d9' } } }
+        }
+      });
+    }
+    
+    // 生成分析
+    function generateAnalysis(data) {
+      const history = data.history;
+      if (history.length < 2) {
+        document.getElementById('analysis').innerHTML = '<h3>📊 分析</h3><p>数据收集中，稍后刷新查看分析...</p>';
+        return;
+      }
+      
+      const first = history[0];
+      const latest = history[history.length - 1];
+      const trigger = data.trigger;
+      
+      let analysis = [];
+      
+      // 价格分析
+      const priceChange = ((parseFloat(latest.price) - parseFloat(first.price)) / parseFloat(first.price) * 100);
+      if (Math.abs(priceChange) > 5) {
+        analysis.push(`价格${priceChange > 0 ? '继续上涨' : '继续下跌'} ${Math.abs(priceChange).toFixed(1)}%`);
+      } else {
+        analysis.push('价格趋于稳定');
+      }
+      
+      // OI 分析
+      if (first.oi && latest.oi) {
+        const oiChange = ((parseFloat(latest.oi.usd) - parseFloat(first.oi.usd)) / parseFloat(first.oi.usd) * 100);
+        if (oiChange > 20) {
+          analysis.push(`OI 大幅增加 +${oiChange.toFixed(1)}%，新资金入场`);
+        } else if (oiChange < -20) {
+          analysis.push(`OI 大幅减少 ${oiChange.toFixed(1)}%，仓位平仓离场`);
+        }
+      }
+      
+      // 大户分析
+      if (first.longShort && latest.longShort) {
+        const longChange = (parseFloat(latest.longShort.long) - parseFloat(first.longShort.long)) * 100;
+        if (longChange > 5) {
+          analysis.push(`大户多头增加 +${longChange.toFixed(1)}%`);
+        } else if (longChange < -5) {
+          analysis.push(`大户多头减少 ${longChange.toFixed(1)}%，可能在出货`);
+        }
+      }
+      
+      // 主动买卖分析
+      const recentTaker = history.slice(-3);
+      const avgRatio = recentTaker.reduce((sum, h) => sum + (h.taker ? parseFloat(h.taker.ratio) : 1), 0) / recentTaker.length;
+      if (avgRatio > 1.2) {
+        analysis.push('近期主动买盘强劲');
+      } else if (avgRatio < 0.8) {
+        analysis.push('近期主动卖盘占优');
+      }
+      
+      document.getElementById('analysis').innerHTML = `
+        <h3>📊 实时分析</h3>
+        <p><strong>触发原因：</strong>${parseFloat(trigger.change15m) > 0 ? '暴涨' : '暴跌'} ${trigger.change15m}%（15分钟）</p>
+        <p><strong>当前状态：</strong>${analysis.join('；') || '观察中'}</p>
+      `;
+    }
+    
+    // 返回列表
+    function showList() {
+      if (refreshTimer) clearInterval(refreshTimer);
+      document.getElementById('detail-view').classList.remove('active');
+      document.getElementById('list-view').style.display = 'block';
+      history.pushState({}, '', window.location.pathname);
+      loadList();
+    }
+    
+    // 启动
+    init();
+    
+    // 列表定时刷新
+    setInterval(() => {
+      if (!document.getElementById('detail-view').classList.contains('active')) {
+        loadList();
+      }
+    }, 30000);
+  </script>
+</body>
+</html>
