@@ -173,7 +173,186 @@
         "short": "0",
         "count": 0
       }
+    },
+    {
+      "time": 1773588050038,
+      "price": "71484.00",
+      "change24h": "1.161",
+      "volume24h": "5969125177.96",
+      "oi": {
+        "value": "82601.55900000",
+        "usd": "5907060508.29930000"
+      },
+      "longShort": {
+        "long": "0.5085",
+        "short": "0.4915",
+        "ratio": "1.0348"
+      },
+      "taker": {
+        "ratio": "1.9802",
+        "buy": "86.8320",
+        "sell": "43.8510"
+      },
+      "funding": "-0.00006461",
+      "premium": "-0.0418",
+      "orderBook": {
+        "bidTotal": "0",
+        "askTotal": "0",
+        "ratio": "NaN"
+      },
+      "largeTrades": {
+        "buy": "0",
+        "sell": "0",
+        "count": 0
+      },
+      "liquidations": {
+        "long": "0",
+        "short": "0",
+        "count": 0
+      }
+    },
+    {
+      "time": 1773588110126,
+      "price": "71467.10",
+      "change24h": "1.115",
+      "volume24h": "5968665827.07",
+      "oi": {
+        "value": "82601.55900000",
+        "usd": "5907060508.29930000"
+      },
+      "longShort": {
+        "long": "0.5085",
+        "short": "0.4915",
+        "ratio": "1.0348"
+      },
+      "taker": {
+        "ratio": "1.9802",
+        "buy": "86.8320",
+        "sell": "43.8510"
+      },
+      "funding": "-0.00006461",
+      "premium": "-0.0487",
+      "orderBook": {
+        "bidTotal": "0",
+        "askTotal": "0",
+        "ratio": "NaN"
+      },
+      "largeTrades": {
+        "buy": "0",
+        "sell": "0",
+        "count": 0
+      },
+      "liquidations": {
+        "long": "0",
+        "short": "0",
+        "count": 0
+      }
+    },
+    {
+      "time": 1773588170191,
+      "oi": {
+        "value": "82601.55900000",
+        "usd": "5907060508.29930000"
+      },
+      "longShort": {
+        "long": "0.5078",
+        "short": "0.4922",
+        "ratio": "1.0318"
+      },
+      "taker": {
+        "ratio": "0.4721",
+        "buy": "102.0320",
+        "sell": "216.1420"
+      },
+      "funding": "-0.00006461",
+      "premium": "NaN",
+      "orderBook": {
+        "bidTotal": "0",
+        "askTotal": "0",
+        "ratio": "NaN"
+      },
+      "largeTrades": {
+        "buy": "0",
+        "sell": "0",
+        "count": 0
+      },
+      "liquidations": {
+        "long": "0",
+        "short": "0",
+        "count": 0
+      }
+    },
+    {
+      "time": 1773588230254,
+      "oi": {
+        "value": "82601.55900000",
+        "usd": "5907060508.29930000"
+      },
+      "longShort": {
+        "long": "0.5078",
+        "short": "0.4922",
+        "ratio": "1.0318"
+      },
+      "taker": {
+        "ratio": "0.4721",
+        "buy": "102.0320",
+        "sell": "216.1420"
+      },
+      "funding": "-0.00006461",
+      "premium": "NaN",
+      "orderBook": {
+        "bidTotal": "0",
+        "askTotal": "0",
+        "ratio": "NaN"
+      },
+      "largeTrades": {
+        "buy": "0",
+        "sell": "0",
+        "count": 0
+      },
+      "liquidations": {
+        "long": "0",
+        "short": "0",
+        "count": 0
+      }
+    },
+    {
+      "time": 1773588290403,
+      "price": "71528.70",
+      "change24h": "1.219",
+      "volume24h": "5970965340.32",
+      "oi": {
+        "value": "82601.55900000",
+        "usd": "5907060508.29930000"
+      },
+      "longShort": {
+        "long": "0.5078",
+        "short": "0.4922",
+        "ratio": "1.0318"
+      },
+      "taker": {
+        "ratio": "0.4721",
+        "buy": "102.0320",
+        "sell": "216.1420"
+      },
+      "funding": "-0.00006461",
+      "premium": "-0.0298",
+      "orderBook": {
+        "bidTotal": "0",
+        "askTotal": "0",
+        "ratio": "NaN"
+      },
+      "largeTrades": {
+        "buy": "0",
+        "sell": "0",
+        "count": 0
+      },
+      "liquidations": {
+        "long": "0",
+        "short": "0",
+        "count": 0
+      }
     }
   ],
-  "lastUpdate": 1773587988597
+  "lastUpdate": 1773588290411
 }
