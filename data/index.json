@@ -111,7 +111,35 @@
         "time": 1773607441654.7043
       },
       "startTime": 1773607460990
+    },
+    {
+      "symbol": "SYSUSDT",
+      "trigger": {
+        "symbol": "SYSUSDT",
+        "price": 0.0123,
+        "change_pct": 2.0746887966805,
+        "type": "price",
+        "triggers": [
+          "价格异动 +2.07%"
+        ],
+        "time": 1773607845534.0388
+      },
+      "startTime": 1773608080693
+    },
+    {
+      "symbol": "PUFFERUSDT",
+      "trigger": {
+        "symbol": "PUFFERUSDT",
+        "price": 0.03339,
+        "change_pct": 2.0164986251145764,
+        "type": "price",
+        "triggers": [
+          "价格异动 +2.02%"
+        ],
+        "time": 1773607998414.2612
+      },
+      "startTime": 1773608081612
     }
   ],
-  "lastUpdate": 1773607779476
+  "lastUpdate": 1773608092274
 }

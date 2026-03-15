@@ -1,0 +1,56 @@
+{
+  "symbol": "SYSUSDT",
+  "trigger": {
+    "symbol": "SYSUSDT",
+    "price": 0.0123,
+    "change_pct": 2.0746887966805,
+    "type": "price",
+    "triggers": [
+      "价格异动 +2.07%"
+    ],
+    "time": 1773607845534.0388
+  },
+  "startTime": 1773608080693,
+  "endTime": 5373604480693,
+  "history": [
+    {
+      "time": 1773608090244,
+      "price": "0.0121600",
+      "oi": {
+        "value": "60896913.00000000",
+        "usd": "732262.84696719"
+      },
+      "longShort": {
+        "long": "0.6988",
+        "short": "0.3012"
+      },
+      "taker": {
+        "ratio": "0.5105",
+        "buy": "51170.0000",
+        "sell": "100241.0000"
+      },
+      "funding": "0.00005000",
+      "liquidations": {
+        "longLiq": 0,
+        "shortLiq": 0,
+        "count": 0,
+        "total": 0
+      },
+      "premium": "-0.2461",
+      "largeTrades": {
+        "largeBuy": 0,
+        "largeSell": 0,
+        "count": 0,
+        "total": 0
+      },
+      "orderBook": {
+        "bidTotal": "23072.68",
+        "askTotal": "20569.04",
+        "ratio": "1.122",
+        "topBid": "0.0121600",
+        "topAsk": "0.0121700"
+      }
+    }
+  ],
+  "lastUpdate": 1773608092273
+}

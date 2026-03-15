@@ -1,0 +1,49 @@
+{
+  "symbol": "PUFFERUSDT",
+  "trigger": {
+    "symbol": "PUFFERUSDT",
+    "price": 0.03339,
+    "change_pct": 2.0164986251145764,
+    "type": "price",
+    "triggers": [
+      "价格异动 +2.02%"
+    ],
+    "time": 1773607998414.2612
+  },
+  "startTime": 1773608081612,
+  "endTime": 5373604481612,
+  "history": [
+    {
+      "time": 1773608091262,
+      "oi": {
+        "value": "22314207.00000000",
+        "usd": "712809.26810733"
+      },
+      "longShort": {
+        "long": "0.5836",
+        "short": "0.4164"
+      },
+      "taker": {
+        "ratio": "0.8673",
+        "buy": "98468.0000",
+        "sell": "113529.0000"
+      },
+      "funding": "0.00005000",
+      "liquidations": {
+        "longLiq": 0,
+        "shortLiq": 0,
+        "count": 0,
+        "total": 0
+      },
+      "premium": null,
+      "largeTrades": {
+        "largeBuy": 0,
+        "largeSell": 0,
+        "count": 0,
+        "total": 0
+      },
+      "orderBook": null
+    }
+  ],
+  "lastUpdate": 1773608092273
+}
