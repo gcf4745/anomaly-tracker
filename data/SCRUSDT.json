@@ -1,0 +1,56 @@
+{
+  "symbol": "SCRUSDT",
+  "trigger": {
+    "symbol": "SCRUSDT",
+    "price": 0.04518,
+    "change_pct": -2.1442495126705756,
+    "type": "price",
+    "triggers": [
+      "价格异动 -2.14%"
+    ],
+    "time": 1773608468468.7896
+  },
+  "startTime": 1773608705464,
+  "endTime": 5373605105464,
+  "history": [
+    {
+      "time": 1773608716594,
+      "price": "0.0453300",
+      "oi": {
+        "value": "30204281.00000000",
+        "usd": "1356776.30252000"
+      },
+      "longShort": {
+        "long": "0.5964",
+        "short": "0.4036"
+      },
+      "taker": {
+        "ratio": "1.5442",
+        "buy": "875543.0000",
+        "sell": "566973.0000"
+      },
+      "funding": "-0.00000152",
+      "liquidations": {
+        "longLiq": 0,
+        "shortLiq": 0,
+        "count": 0,
+        "total": 0
+      },
+      "premium": "-0.1762",
+      "largeTrades": {
+        "largeBuy": 0,
+        "largeSell": 0,
+        "count": 0,
+        "total": 0
+      },
+      "orderBook": {
+        "bidTotal": "5959.83",
+        "askTotal": "10658.91",
+        "ratio": "0.559",
+        "topBid": "0.0453500",
+        "topAsk": "0.0453800"
+      }
+    }
+  ],
+  "lastUpdate": 1773608717597
+}

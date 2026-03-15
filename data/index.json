@@ -139,7 +139,21 @@
         "time": 1773607998414.2612
       },
       "startTime": 1773608081612
+    },
+    {
+      "symbol": "SCRUSDT",
+      "trigger": {
+        "symbol": "SCRUSDT",
+        "price": 0.04518,
+        "change_pct": -2.1442495126705756,
+        "type": "price",
+        "triggers": [
+          "价格异动 -2.14%"
+        ],
+        "time": 1773608468468.7896
+      },
+      "startTime": 1773608705464
     }
   ],
-  "lastUpdate": 1773608404192
+  "lastUpdate": 1773608717598
 }
