@@ -1,18 +1,6 @@
 {
   "coins": [
     {
-      "symbol": "THEUSDT",
-      "trigger": {
-        "symbol": "THEUSDT",
-        "price": "0.2298000",
-        "change24h": "-16.830",
-        "change15m": "-35.38",
-        "volume": "177559429.6804600",
-        "time": 1773580716781
-      },
-      "startTime": 1773580719703
-    },
-    {
       "symbol": "XAGUSDT",
       "trigger": {
         "symbol": "XAGUSDT",
@@ -29,5 +17,5 @@
       "startTime": 1773591593970
     }
   ],
-  "lastUpdate": 1773594302960
+  "lastUpdate": 1773595231165
 }
