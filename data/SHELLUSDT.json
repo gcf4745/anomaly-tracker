@@ -1,0 +1,55 @@
+{
+  "symbol": "SHELLUSDT",
+  "trigger": {
+    "symbol": "SHELLUSDT",
+    "price": 0.03541,
+    "change_pct": 5.701492537313418,
+    "type": "price",
+    "triggers": [
+      "价格异动 +5.70%"
+    ],
+    "time": 1773607142677.5393
+  },
+  "startTime": 1773607151678,
+  "endTime": 5373603551678,
+  "history": [
+    {
+      "time": 1773607158733,
+      "oi": {
+        "value": "35797833.00000000",
+        "usd": "1171365.59409777"
+      },
+      "longShort": {
+        "long": "0.5289",
+        "short": "0.4711"
+      },
+      "taker": {
+        "ratio": "0.6806",
+        "buy": "407261.0000",
+        "sell": "598355.0000"
+      },
+      "funding": "0.00001505",
+      "liquidations": {
+        "longLiq": 0,
+        "shortLiq": 0,
+        "count": 0,
+        "total": 0
+      },
+      "premium": null,
+      "largeTrades": {
+        "largeBuy": 0,
+        "largeSell": 0,
+        "count": 0,
+        "total": 0
+      },
+      "orderBook": {
+        "bidTotal": "3286.53",
+        "askTotal": "4986.34",
+        "ratio": "0.659",
+        "topBid": "0.0354400",
+        "topAsk": "0.0355000"
+      }
+    }
+  ],
+  "lastUpdate": 1773607159737
+}

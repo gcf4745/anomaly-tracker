@@ -83,7 +83,21 @@
         "time": 1773606681652.8806
       },
       "startTime": 1773606843875
+    },
+    {
+      "symbol": "SHELLUSDT",
+      "trigger": {
+        "symbol": "SHELLUSDT",
+        "price": 0.03541,
+        "change_pct": 5.701492537313418,
+        "type": "price",
+        "triggers": [
+          "价格异动 +5.70%"
+        ],
+        "time": 1773607142677.5393
+      },
+      "startTime": 1773607151678
     }
   ],
-  "lastUpdate": 1773606850450
+  "lastUpdate": 1773607159737
 }
