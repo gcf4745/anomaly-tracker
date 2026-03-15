@@ -25,8 +25,6 @@
     .coin-change.up { color: #3fb950; }
     .coin-change.down { color: #f85149; }
     .coin-meta { margin-top: 10px; color: #8b949e; font-size: 14px; }
-    
-    /* 详情页 */
     .detail-view { display: none; }
     .detail-view.active { display: block; }
     .back-btn {
@@ -34,514 +32,259 @@
       padding: 8px 16px; border-radius: 6px; cursor: pointer; margin-bottom: 20px;
     }
     .back-btn:hover { background: #30363d; }
-    .detail-header { margin-bottom: 20px; }
-    .detail-header h2 { color: #fff; font-size: 32px; }
+    .detail-header h2 { color: #fff; font-size: 32px; margin-bottom: 20px; }
     .detail-stats { display: grid; grid-template-columns: repeat(auto-fit, minmax(150px, 1fr)); gap: 15px; margin-bottom: 20px; }
     .stat-box { background: #161b22; border: 1px solid #30363d; border-radius: 8px; padding: 15px; }
     .stat-label { color: #8b949e; font-size: 12px; margin-bottom: 5px; }
     .stat-value { color: #fff; font-size: 20px; font-weight: bold; }
     .stat-value.up { color: #3fb950; }
     .stat-value.down { color: #f85149; }
-    
     .charts { display: grid; grid-template-columns: 1fr 1fr; gap: 20px; }
     @media (max-width: 768px) { .charts { grid-template-columns: 1fr; } }
     .chart-box { background: #161b22; border: 1px solid #30363d; border-radius: 8px; padding: 15px; }
     .chart-title { color: #8b949e; font-size: 14px; margin-bottom: 10px; }
-    
     .no-data { text-align: center; padding: 50px; color: #8b949e; }
-    .loading { text-align: center; padding: 50px; }
-    .update-time { color: #8b949e; font-size: 12px; margin-top: 20px; text-align: right; }
-    
-    /* 分析结论 */
     .analysis { background: #161b22; border: 1px solid #30363d; border-radius: 8px; padding: 15px; margin-top: 20px; }
     .analysis h3 { color: #58a6ff; margin-bottom: 10px; }
-    .analysis p { line-height: 1.6; }
+    .update-time { color: #8b949e; font-size: 12px; margin-top: 20px; text-align: right; }
   </style>
 </head>
 <body>
   <div class="container">
-    <!-- 列表页 -->
     <div id="list-view">
       <h1>🔍 异动追踪</h1>
-      <div id="coin-list" class="coin-list">
-        <div class="loading">加载中...</div>
-      </div>
+      <div id="coin-list" class="coin-list"><div class="no-data">加载中...</div></div>
     </div>
-    
-    <!-- 详情页 -->
     <div id="detail-view" class="detail-view">
       <button class="back-btn" onclick="showList()">← 返回列表</button>
-      <div class="detail-header">
-        <h2 id="detail-title">-</h2>
-      </div>
+      <div class="detail-header"><h2 id="detail-title">-</h2></div>
       <div class="detail-stats" id="detail-stats"></div>
       <div class="charts">
-        <div class="chart-box">
-          <div class="chart-title">价格 & OI</div>
-          <canvas id="chart-price-oi"></canvas>
-        </div>
-        <div class="chart-box">
-          <div class="chart-title">大户多空比</div>
-          <canvas id="chart-long-short"></canvas>
-        </div>
-        <div class="chart-box">
-          <div class="chart-title">主动买卖比</div>
-          <canvas id="chart-taker"></canvas>
-        </div>
-        <div class="chart-box">
-          <div class="chart-title">资金费率</div>
-          <canvas id="chart-funding"></canvas>
-        </div>
+        <div class="chart-box"><div class="chart-title">价格 & OI</div><canvas id="chart-price-oi"></canvas></div>
+        <div class="chart-box"><div class="chart-title">大户多空比</div><canvas id="chart-long-short"></canvas></div>
+        <div class="chart-box"><div class="chart-title">主动买卖比</div><canvas id="chart-taker"></canvas></div>
+        <div class="chart-box"><div class="chart-title">资金费率</div><canvas id="chart-funding"></canvas></div>
       </div>
       <div class="analysis" id="analysis"></div>
       <div class="update-time" id="update-time"></div>
     </div>
   </div>
+<script>
+const DATA_BASE = './data';
+let charts = {};
+let refreshTimer = null;
 
-  <script>
-    const DATA_BASE = './data';
-    let charts = {};
-    let refreshTimer = null;
-    
-    // 初始化
-    async function init() {
-      const urlParams = new URLSearchParams(window.location.search);
-      const symbol = urlParams.get('coin');
-      
-      if (symbol) {
-        await showDetail(symbol + 'USDT');
-      } else {
-        await loadList();
-      }
+async function init() {
+  const urlParams = new URLSearchParams(window.location.search);
+  const symbol = urlParams.get('coin');
+  if (symbol) { await showDetail(symbol + 'USDT'); } 
+  else { await loadList(); }
+}
+
+async function loadList() {
+  try {
+    const resp = await fetch(DATA_BASE + '/index.json?t=' + Date.now());
+    const data = await resp.json();
+    const listEl = document.getElementById('coin-list');
+    if (!data.coins || data.coins.length === 0) {
+      listEl.innerHTML = '<div class="no-data">暂无异动追踪<br><br>当检测到15分钟涨跌幅超过12%的币种时，将自动开始追踪</div>';
+      return;
     }
+    listEl.innerHTML = data.coins.map(coin => {
+      const symbol = coin.symbol.replace('USDT', '');
+      const change = parseFloat(coin.trigger.change15m);
+      const isUp = change > 0;
+      return '<div class="coin-card" onclick="showDetail(\'' + coin.symbol + '\')">' +
+        '<div class="coin-header"><span class="coin-name">' + symbol + '</span>' +
+        '<span class="coin-change ' + (isUp ? 'up' : 'down') + '">' + (isUp ? '+' : '') + change + '%</span></div>' +
+        '<div class="coin-meta">价格: $' + coin.trigger.price + ' | 触发: ' + new Date(coin.startTime).toLocaleTimeString() + '</div></div>';
+    }).join('');
+  } catch (e) {
+    document.getElementById('coin-list').innerHTML = '<div class="no-data">加载失败: ' + e.message + '</div>';
+  }
+}
+
+async function showDetail(symbol) {
+  document.getElementById('list-view').style.display = 'none';
+  document.getElementById('detail-view').classList.add('active');
+  history.pushState({}, '', '?coin=' + symbol.replace('USDT', ''));
+  await loadDetail(symbol);
+  if (refreshTimer) clearInterval(refreshTimer);
+  refreshTimer = setInterval(() => loadDetail(symbol), 30000);
+}
+
+async function loadDetail(symbol) {
+  try {
+    const resp = await fetch(DATA_BASE + '/' + symbol + '.json?t=' + Date.now());
+    const data = await resp.json();
+    document.getElementById('detail-title').textContent = symbol.replace('USDT', '') + ' 异动追踪';
     
-    // 加载列表
-    async function loadList() {
-      try {
-        const resp = await fetch(`${DATA_BASE}/index.json?t=${Date.now()}`);
-        const data = await resp.json();
-        
-        const listEl = document.getElementById('coin-list');
-        
-        if (!data.coins || data.coins.length === 0) {
-          listEl.innerHTML = '<div class="no-data">暂无异动追踪<br><br>当检测到15分钟涨跌幅超过12%的币种时，将自动开始追踪</div>';
-          return;
-        }
-        
-        listEl.innerHTML = data.coins.map(coin => {
-          const symbol = coin.symbol.replace('USDT', '');
-          const change = parseFloat(coin.trigger.change15m);
-          const isUp = change > 0;
-          return `
-            <div class="coin-card" onclick="showDetail('${coin.symbol}')">
-              <div class="coin-header">
-                <span class="coin-name">${symbol}</span>
-                <span class="coin-change ${isUp ? 'up' : 'down'}">${isUp ? '+' : ''}${change}%</span>
-              </div>
-              <div class="coin-meta">
-                价格: $${coin.trigger.price} | 
-                触发时间: ${new Date(coin.startTime).toLocaleTimeString()}
-              </div>
-            </div>
-          `;
-        }).join('');
-        
-      } catch (e) {
-        document.getElementById('coin-list').innerHTML = '<div class="no-data">加载失败: ' + e.message + '</div>';
-      }
-    }
+    const latest = data.history[data.history.length - 1] || {};
+    const trigger = data.trigger;
+    const priceChange = latest.price && trigger.price 
+      ? ((parseFloat(latest.price) - parseFloat(trigger.price)) / parseFloat(trigger.price) * 100).toFixed(2) : '-';
     
-    // 显示详情
-    async function showDetail(symbol) {
-      document.getElementById('list-view').style.display = 'none';
-      document.getElementById('detail-view').classList.add('active');
-      
-      // 更新 URL
-      const coinName = symbol.replace('USDT', '');
-      history.pushState({}, '', `?coin=${coinName}`);
-      
-      await loadDetail(symbol);
-      
-      // 定时刷新
-      if (refreshTimer) clearInterval(refreshTimer);
-      refreshTimer = setInterval(() => loadDetail(symbol), 30000);
-    }
+    document.getElementById('detail-stats').innerHTML = 
+      '<div class="stat-box"><div class="stat-label">触发价格</div><div class="stat-value">$' + trigger.price + '</div></div>' +
+      '<div class="stat-box"><div class="stat-label">当前价格</div><div class="stat-value">$' + (latest.price || '-') + '</div></div>' +
+      '<div class="stat-box"><div class="stat-label">总涨跌</div><div class="stat-value ' + (parseFloat(priceChange) > 0 ? 'up' : 'down') + '">' + priceChange + '%</div></div>' +
+      '<div class="stat-box"><div class="stat-label">OI</div><div class="stat-value">$' + (latest.oi ? (parseFloat(latest.oi.usd)/1e6).toFixed(2) + 'M' : '-') + '</div></div>' +
+      '<div class="stat-box"><div class="stat-label">大户多头</div><div class="stat-value">' + (latest.longShort ? (parseFloat(latest.longShort.long)*100).toFixed(1) + '%' : '-') + '</div></div>' +
+      '<div class="stat-box"><div class="stat-label">数据点数</div><div class="stat-value">' + data.history.length + '</div></div>';
     
-    // 加载详情数据
-    async function loadDetail(symbol) {
-      try {
-        const resp = await fetch(`${DATA_BASE}/${symbol}.json?t=${Date.now()}`);
-        const data = await resp.json();
-        
-        const coinName = symbol.replace('USDT', '');
-        document.getElementById('detail-title').textContent = `${coinName} 异动追踪`;
-        
-        // 统计数据
-        const latest = data.history[data.history.length - 1] || {};
-        const first = data.history[0] || {};
-        
-        const priceChange = latest.price && data.trigger.price 
-          ? ((parseFloat(latest.price) - parseFloat(data.trigger.price)) / parseFloat(data.trigger.price) * 100).toFixed(2)
-          : '-';
-        
-        const oiChange = latest.oi && first.oi
-          ? ((parseFloat(latest.oi.usd) - parseFloat(first.oi.usd)) / parseFloat(first.oi.usd) * 100).toFixed(2)
-          : '-';
-        
-        document.getElementById('detail-stats').innerHTML = `
-          <div class="stat-box">
-            <div class="stat-label">当前价格</div>
-            <div class="stat-value">$${latest.price || '-'}</div>
-          </div>
-          <div class="stat-box">
-            <div class="stat-label">追踪期间涨跌</div>
-            <div class="stat-value ${parseFloat(priceChange) > 0 ? 'up' : 'down'}">${priceChange}%</div>
-          </div>
-          <div class="stat-box">
-            <div class="stat-label">OI (USD)</div>
-            <div class="stat-value">$${latest.oi ? (parseFloat(latest.oi.usd)/1000000).toFixed(2) + 'M' : '-'}</div>
-          </div>
-          <div class="stat-box">
-            <div class="stat-label">OI 变化</div>
-            <div class="stat-value ${parseFloat(oiChange) > 0 ? 'up' : 'down'}">${oiChange}%</div>
-          </div>
-          <div class="stat-box">
-            <div class="stat-label">大户多头</div>
-            <div class="stat-value">${latest.longShort ? (parseFloat(latest.longShort.long) * 100).toFixed(1) + '%' : '-'}</div>
-          </div>
-          <div class="stat-box">
-            <div class="stat-label">主动买卖比</div>
-            <div class="stat-value">${latest.taker ? latest.taker.ratio : '-'}</div>
-          </div>
-        `;
-        
-        // 绘制图表
-        renderCharts(data);
-        
-                // 生成分析
-    function generateAnalysis(data) {
-      const history = data.history;
-      if (history.length < 3) {
-        document.getElementById('analysis').innerHTML = '<h3>📊 实时分析</h3><p>数据收集中（至少需要3个数据点）...</p>';
-        return;
-      }
-      
-      const trigger = data.trigger;
-      const triggerPrice = parseFloat(trigger.price);
-      const prices = history.map(h => parseFloat(h.price)).filter(p => !isNaN(p));
-      const latest = history[history.length - 1];
-      const currentPrice = parseFloat(latest.price);
-      
-      // ========== 价格趋势分析 ==========
-      const maxPrice = Math.max(...prices);
-      const minPrice = Math.min(...prices);
-      const maxIdx = prices.indexOf(maxPrice);
-      const minIdx = prices.indexOf(minPrice);
-      
-      let priceAnalysis = '';
-      const fromTrigger = ((currentPrice - triggerPrice) / triggerPrice * 100).toFixed(1);
-      const fromMax = ((currentPrice - maxPrice) / maxPrice * 100).toFixed(1);
-      const fromMin = ((currentPrice - minPrice) / minPrice * 100).toFixed(1);
-      
-      // 判断当前阶段
-      let phase = '';
-      if (maxIdx > minIdx && currentPrice > (maxPrice + minPrice) / 2) {
-        phase = '反弹中';
-      } else if (maxIdx < minIdx && currentPrice < (maxPrice + minPrice) / 2) {
-        phase = '下跌中';
-      } else if (Math.abs(fromMax) < 3 && maxIdx > prices.length * 0.7) {
-        phase = '高位震荡';
-      } else if (Math.abs(fromMin) < 3 && minIdx > prices.length * 0.7) {
-        phase = '低位企稳';
-      } else {
-        phase = '震荡整理';
-      }
-      
-      priceAnalysis = '触发价 
-    
-    // 返回列表
-    function showList() {
-      if (refreshTimer) clearInterval(refreshTimer);
-      document.getElementById('detail-view').classList.remove('active');
-      document.getElementById('list-view').style.display = 'block';
-      history.pushState({}, '', window.location.pathname);
-      loadList();
-    }
-    
-    // 启动
-    init();
-    
-    // 列表定时刷新
-    setInterval(() => {
-      if (!document.getElementById('detail-view').classList.contains('active')) {
-        loadList();
-      }
-    }, 30000);
-  </script>
-</body>
-</html>
- + trigger.price + ' → 最高 
-    
-    // 返回列表
-    function showList() {
-      if (refreshTimer) clearInterval(refreshTimer);
-      document.getElementById('detail-view').classList.remove('active');
-      document.getElementById('list-view').style.display = 'block';
-      history.pushState({}, '', window.location.pathname);
-      loadList();
-    }
-    
-    // 启动
-    init();
-    
-    // 列表定时刷新
-    setInterval(() => {
-      if (!document.getElementById('detail-view').classList.contains('active')) {
-        loadList();
-      }
-    }, 30000);
-  </script>
-</body>
-</html>
- + maxPrice.toFixed(4) + ' → 最低 
-    
-    // 返回列表
-    function showList() {
-      if (refreshTimer) clearInterval(refreshTimer);
-      document.getElementById('detail-view').classList.remove('active');
-      document.getElementById('list-view').style.display = 'block';
-      history.pushState({}, '', window.location.pathname);
-      loadList();
-    }
-    
-    // 启动
-    init();
-    
-    // 列表定时刷新
-    setInterval(() => {
-      if (!document.getElementById('detail-view').classList.contains('active')) {
-        loadList();
-      }
-    }, 30000);
-  </script>
-</body>
-</html>
- + minPrice.toFixed(4) + ' → 现价 
-    
-    // 返回列表
-    function showList() {
-      if (refreshTimer) clearInterval(refreshTimer);
-      document.getElementById('detail-view').classList.remove('active');
-      document.getElementById('list-view').style.display = 'block';
-      history.pushState({}, '', window.location.pathname);
-      loadList();
-    }
-    
-    // 启动
-    init();
-    
-    // 列表定时刷新
-    setInterval(() => {
-      if (!document.getElementById('detail-view').classList.contains('active')) {
-        loadList();
-      }
-    }, 30000);
-  </script>
-</body>
-</html>
- + currentPrice.toFixed(4);
-      priceAnalysis += '<br>从触发点: ' + (fromTrigger > 0 ? '+' : '') + fromTrigger + '% | 距最高: ' + fromMax + '% | 距最低: +' + fromMin + '%';
-      
-      // ========== OI 趋势分析 ==========
-      let oiAnalysis = '';
-      const oiData = history.filter(h => h.oi && h.oi.usd).map(h => parseFloat(h.oi.usd));
-      if (oiData.length >= 2) {
-        const oiFirst = oiData[0];
-        const oiLatest = oiData[oiData.length - 1];
-        const oiMax = Math.max(...oiData);
-        const oiMin = Math.min(...oiData);
-        const oiChange = ((oiLatest - oiFirst) / oiFirst * 100).toFixed(1);
-        
-        // OI 趋势
-        const oiRecent = oiData.slice(-3);
-        const oiTrend = oiRecent[oiRecent.length - 1] > oiRecent[0] ? '↑' : '↓';
-        
-        oiAnalysis = 'OI: 
-    
-    // 返回列表
-    function showList() {
-      if (refreshTimer) clearInterval(refreshTimer);
-      document.getElementById('detail-view').classList.remove('active');
-      document.getElementById('list-view').style.display = 'block';
-      history.pushState({}, '', window.location.pathname);
-      loadList();
-    }
-    
-    // 启动
-    init();
-    
-    // 列表定时刷新
-    setInterval(() => {
-      if (!document.getElementById('detail-view').classList.contains('active')) {
-        loadList();
-      }
-    }, 30000);
-  </script>
-</body>
-</html>
- + (oiFirst/1e6).toFixed(2) + 'M → 
-    
-    // 返回列表
-    function showList() {
-      if (refreshTimer) clearInterval(refreshTimer);
-      document.getElementById('detail-view').classList.remove('active');
-      document.getElementById('list-view').style.display = 'block';
-      history.pushState({}, '', window.location.pathname);
-      loadList();
-    }
-    
-    // 启动
-    init();
-    
-    // 列表定时刷新
-    setInterval(() => {
-      if (!document.getElementById('detail-view').classList.contains('active')) {
-        loadList();
-      }
-    }, 30000);
-  </script>
-</body>
-</html>
- + (oiLatest/1e6).toFixed(2) + 'M (' + (oiChange > 0 ? '+' : '') + oiChange + '%) ' + oiTrend;
-        oiAnalysis += '<br>区间: 
-    
-    // 返回列表
-    function showList() {
-      if (refreshTimer) clearInterval(refreshTimer);
-      document.getElementById('detail-view').classList.remove('active');
-      document.getElementById('list-view').style.display = 'block';
-      history.pushState({}, '', window.location.pathname);
-      loadList();
-    }
-    
-    // 启动
-    init();
-    
-    // 列表定时刷新
-    setInterval(() => {
-      if (!document.getElementById('detail-view').classList.contains('active')) {
-        loadList();
-      }
-    }, 30000);
-  </script>
-</body>
-</html>
- + (oiMin/1e6).toFixed(2) + 'M ~ 
-    
-    // 返回列表
-    function showList() {
-      if (refreshTimer) clearInterval(refreshTimer);
-      document.getElementById('detail-view').classList.remove('active');
-      document.getElementById('list-view').style.display = 'block';
-      history.pushState({}, '', window.location.pathname);
-      loadList();
-    }
-    
-    // 启动
-    init();
-    
-    // 列表定时刷新
-    setInterval(() => {
-      if (!document.getElementById('detail-view').classList.contains('active')) {
-        loadList();
-      }
-    }, 30000);
-  </script>
-</body>
-</html>
- + (oiMax/1e6).toFixed(2) + 'M';
-      }
-      
-      // ========== 大户多空分析 ==========
-      let whaleAnalysis = '';
-      const longData = history.filter(h => h.longShort).map(h => parseFloat(h.longShort.long) * 100);
-      if (longData.length >= 2) {
-        const longFirst = longData[0];
-        const longLatest = longData[longData.length - 1];
-        const longMax = Math.max(...longData);
-        const longMin = Math.min(...longData);
-        const longChange = (longLatest - longFirst).toFixed(1);
-        
-        // 趋势
-        const longRecent = longData.slice(-3);
-        const longTrend = longRecent[longRecent.length - 1] > longRecent[0] ? '↑ 加仓' : '↓ 减仓';
-        
-        whaleAnalysis = '大户多头: ' + longFirst.toFixed(1) + '% → ' + longLatest.toFixed(1) + '% (' + (longChange > 0 ? '+' : '') + longChange + '%) ' + longTrend;
-        whaleAnalysis += '<br>区间: ' + longMin.toFixed(1) + '% ~ ' + longMax.toFixed(1) + '%';
-      }
-      
-      // ========== 主动买卖分析 ==========
-      let takerAnalysis = '';
-      const takerData = history.filter(h => h.taker).map(h => parseFloat(h.taker.ratio));
-      if (takerData.length >= 2) {
-        const buyDominant = takerData.filter(r => r > 1).length;
-        const sellDominant = takerData.filter(r => r < 1).length;
-        const latestRatio = takerData[takerData.length - 1];
-        
-        takerAnalysis = '买卖比: ' + (buyDominant > sellDominant ? '🟢 买方主导 (' + buyDominant + '/' + takerData.length + ')' : '🔴 卖方主导 (' + sellDominant + '/' + takerData.length + ')');
-        takerAnalysis += ' | 最新: ' + latestRatio.toFixed(3);
-      }
-      
-      // ========== 综合判断 ==========
-      let verdict = '';
-      const oiTrend = oiData.length >= 2 ? (oiData[oiData.length-1] - oiData[0]) / oiData[0] : 0;
-      const longTrend = longData.length >= 2 ? longData[longData.length-1] - longData[0] : 0;
-      
-      if (phase === '下跌中' && oiTrend > 0.1 && longTrend < -3) {
-        verdict = '⚠️ <strong>危险信号</strong>：价格下跌 + OI 增加 + 大户减仓 = 散户接盘中';
-      } else if (phase === '下跌中' && oiTrend < -0.1) {
-        verdict = '📉 <strong>多头止损</strong>：价格下跌 + OI 减少 = 多头平仓离场';
-      } else if (phase === '反弹中' && oiTrend < -0.1) {
-        verdict = '✅ <strong>空头回补</strong>：价格反弹 + OI 减少 = 空头平仓推动';
-      } else if (phase === '反弹中' && oiTrend > 0.2) {
-        verdict = '⚠️ <strong>高杠杆反弹</strong>：价格反弹 + OI 暴增 = 注意回调风险';
-      } else if (phase === '低位企稳' && longTrend > 2) {
-        verdict = '👀 <strong>抄底信号</strong>：低位企稳 + 大户加仓';
-      } else if (phase === '高位震荡' && longTrend < -2) {
-        verdict = '⚠️ <strong>出货信号</strong>：高位震荡 + 大户减仓';
-      } else {
-        verdict = '👀 <strong>观望</strong>：' + phase + '，等待明确方向';
-      }
-      
-      document.getElementById('analysis').innerHTML = 
-        '<h3>📊 实时全局分析</h3>' +
-        '<div style="display:grid;gap:12px;margin-top:10px;">' +
-        '<div style="padding:10px;background:#21262d;border-radius:6px;"><strong>📈 价格走势</strong>（' + phase + '）<br>' + priceAnalysis + '</div>' +
-        (oiAnalysis ? '<div style="padding:10px;background:#21262d;border-radius:6px;"><strong>💰 持仓量(OI)</strong><br>' + oiAnalysis + '</div>' : '') +
-        (whaleAnalysis ? '<div style="padding:10px;background:#21262d;border-radius:6px;"><strong>🐋 大户动向</strong><br>' + whaleAnalysis + '</div>' : '') +
-        (takerAnalysis ? '<div style="padding:10px;background:#21262d;border-radius:6px;"><strong>⚡ 主动买卖</strong><br>' + takerAnalysis + '</div>' : '') +
-        '<div style="padding:12px;background:#1a1f29;border:1px solid #30363d;border-radius:6px;font-size:16px;">' + verdict + '</div>' +
-        '</div>';
-    }
-    
-    // 返回列表
-    function showList() {
-      if (refreshTimer) clearInterval(refreshTimer);
-      document.getElementById('detail-view').classList.remove('active');
-      document.getElementById('list-view').style.display = 'block';
-      history.pushState({}, '', window.location.pathname);
-      loadList();
-    }
-    
-    // 启动
-    init();
-    
-    // 列表定时刷新
-    setInterval(() => {
-      if (!document.getElementById('detail-view').classList.contains('active')) {
-        loadList();
-      }
-    }, 30000);
-  </script>
+    renderCharts(data);
+    generateAnalysis(data);
+    document.getElementById('update-time').textContent = '最后更新: ' + new Date(data.lastUpdate).toLocaleString();
+  } catch (e) { console.error('加载详情失败:', e); }
+}
+
+function renderCharts(data) {
+  const history = data.history;
+  
+  // 数据太多时聚合显示
+  let displayData = history;
+  if (history.length > 100) {
+    const step = Math.ceil(history.length / 100);
+    displayData = history.filter((_, i) => i % step === 0 || i === history.length - 1);
+  }
+  
+  const labels = displayData.map(h => {
+    const d = new Date(h.time);
+    return d.toLocaleTimeString('zh-CN', {hour:'2-digit', minute:'2-digit'});
+  });
+  
+  Object.values(charts).forEach(c => c.destroy());
+  charts = {};
+  
+  const baseOpts = {
+    responsive: true,
+    plugins: { legend: { labels: { color: '#c9d1d9' } } },
+    scales: { x: { ticks: { color: '#8b949e' }, grid: { color: '#30363d' } }, y: { ticks: { color: '#8b949e' }, grid: { color: '#30363d' } } }
+  };
+  
+  charts.priceOi = new Chart(document.getElementById('chart-price-oi'), {
+    type: 'line',
+    data: {
+      labels,
+      datasets: [
+        { label: '价格', data: displayData.map(h => parseFloat(h.price)), borderColor: '#58a6ff', yAxisID: 'y', tension: 0.1, pointRadius: displayData.length > 30 ? 0 : 3 },
+        { label: 'OI(M)', data: displayData.map(h => h.oi ? parseFloat(h.oi.usd)/1e6 : null), borderColor: '#f0883e', yAxisID: 'y1', tension: 0.1, pointRadius: displayData.length > 30 ? 0 : 3 }
+      ]
+    },
+    options: { ...baseOpts, scales: { ...baseOpts.scales, y: { position: 'left', ticks: { color: '#8b949e' }, grid: { color: '#30363d' } }, y1: { position: 'right', ticks: { color: '#8b949e' }, grid: { display: false } } } }
+  });
+  
+  charts.longShort = new Chart(document.getElementById('chart-long-short'), {
+    type: 'line',
+    data: {
+      labels,
+      datasets: [
+        { label: '多头%', data: displayData.map(h => h.longShort ? parseFloat(h.longShort.long)*100 : null), borderColor: '#3fb950', fill: true, backgroundColor: 'rgba(63,185,80,0.1)', pointRadius: displayData.length > 30 ? 0 : 3 },
+        { label: '空头%', data: displayData.map(h => h.longShort ? parseFloat(h.longShort.short)*100 : null), borderColor: '#f85149', fill: true, backgroundColor: 'rgba(248,81,73,0.1)', pointRadius: displayData.length > 30 ? 0 : 3 }
+      ]
+    },
+    options: baseOpts
+  });
+  
+  charts.taker = new Chart(document.getElementById('chart-taker'), {
+    type: 'bar',
+    data: {
+      labels,
+      datasets: [{ label: '买卖比', data: displayData.map(h => h.taker ? parseFloat(h.taker.ratio) : null), backgroundColor: displayData.map(h => !h.taker ? '#30363d' : parseFloat(h.taker.ratio) > 1 ? '#3fb950' : '#f85149') }]
+    },
+    options: baseOpts
+  });
+  
+  charts.funding = new Chart(document.getElementById('chart-funding'), {
+    type: 'line',
+    data: { labels, datasets: [{ label: '资金费率%', data: displayData.map(h => h.funding ? parseFloat(h.funding)*100 : null), borderColor: '#a371f7', tension: 0.1, pointRadius: displayData.length > 30 ? 0 : 3 }] },
+    options: baseOpts
+  });
+}
+
+function generateAnalysis(data) {
+  const history = data.history;
+  if (history.length < 3) {
+    document.getElementById('analysis').innerHTML = '<h3>📊 实时分析</h3><p>数据收集中（至少需要3个数据点）...</p>';
+    return;
+  }
+  
+  const trigger = data.trigger;
+  const triggerPrice = parseFloat(trigger.price);
+  const prices = history.map(h => parseFloat(h.price)).filter(p => !isNaN(p));
+  const latest = history[history.length - 1];
+  const first = history[0];
+  const currentPrice = parseFloat(latest.price);
+  
+  const maxPrice = Math.max(...prices), minPrice = Math.min(...prices);
+  const maxIdx = prices.indexOf(maxPrice), minIdx = prices.indexOf(minPrice);
+  const fromTrigger = ((currentPrice - triggerPrice) / triggerPrice * 100).toFixed(1);
+  const fromMax = ((currentPrice - maxPrice) / maxPrice * 100).toFixed(1);
+  const fromMin = ((currentPrice - minPrice) / minPrice * 100).toFixed(1);
+  
+  let phase = '震荡整理';
+  if (maxIdx > minIdx && currentPrice > (maxPrice + minPrice) / 2) phase = '反弹中';
+  else if (maxIdx < minIdx && currentPrice < (maxPrice + minPrice) / 2) phase = '下跌中';
+  else if (Math.abs(parseFloat(fromMax)) < 3 && maxIdx > prices.length * 0.7) phase = '高位震荡';
+  else if (Math.abs(parseFloat(fromMin)) < 3 && minIdx > prices.length * 0.7) phase = '低位企稳';
+  
+  let priceAnalysis = '触发 $' + trigger.price + ' → 最高 $' + maxPrice.toFixed(4) + ' → 最低 $' + minPrice.toFixed(4) + ' → 现价 $' + currentPrice.toFixed(4);
+  priceAnalysis += '<br>从触发: ' + (fromTrigger > 0 ? '+' : '') + fromTrigger + '% | 距高点: ' + fromMax + '% | 距低点: +' + fromMin + '%';
+  
+  let oiAnalysis = '';
+  const oiData = history.filter(h => h.oi).map(h => parseFloat(h.oi.usd));
+  if (oiData.length >= 2) {
+    const oiChange = ((oiData[oiData.length-1] - oiData[0]) / oiData[0] * 100).toFixed(1);
+    const oiTrend = oiData.slice(-3).reduce((a,b) => b > a ? '↑' : '↓', '');
+    oiAnalysis = 'OI: $' + (oiData[0]/1e6).toFixed(2) + 'M → $' + (oiData[oiData.length-1]/1e6).toFixed(2) + 'M (' + (oiChange > 0 ? '+' : '') + oiChange + '%)';
+  }
+  
+  let whaleAnalysis = '';
+  const longData = history.filter(h => h.longShort).map(h => parseFloat(h.longShort.long) * 100);
+  if (longData.length >= 2) {
+    const longChange = (longData[longData.length-1] - longData[0]).toFixed(1);
+    const trend = longData[longData.length-1] > longData[longData.length-3] ? '↑加仓' : '↓减仓';
+    whaleAnalysis = '大户多头: ' + longData[0].toFixed(1) + '% → ' + longData[longData.length-1].toFixed(1) + '% (' + (longChange > 0 ? '+' : '') + longChange + '%) ' + trend;
+  }
+  
+  let takerAnalysis = '';
+  const takerData = history.filter(h => h.taker).map(h => parseFloat(h.taker.ratio));
+  if (takerData.length >= 2) {
+    const buyCount = takerData.filter(r => r > 1).length;
+    takerAnalysis = '买卖: ' + (buyCount > takerData.length/2 ? '🟢买方主导' : '🔴卖方主导') + ' (' + buyCount + '/' + takerData.length + ' 买方)';
+  }
+  
+  const oiTrend = oiData.length >= 2 ? (oiData[oiData.length-1] - oiData[0]) / oiData[0] : 0;
+  const longTrend = longData.length >= 2 ? longData[longData.length-1] - longData[0] : 0;
+  
+  let verdict = '👀 <strong>观望</strong>：' + phase;
+  if (phase === '下跌中' && oiTrend > 0.1 && longTrend < -3) verdict = '⚠️ <strong>危险</strong>：下跌+OI增+大户减仓=散户接盘';
+  else if (phase === '下跌中' && oiTrend < -0.1) verdict = '📉 <strong>多头止损</strong>：下跌+OI减';
+  else if (phase === '反弹中' && oiTrend < -0.1) verdict = '✅ <strong>空头回补</strong>：反弹+OI减';
+  else if (phase === '反弹中' && oiTrend > 0.2) verdict = '⚠️ <strong>高杠杆反弹</strong>：注意回调';
+  else if (phase === '低位企稳' && longTrend > 2) verdict = '👀 <strong>抄底信号</strong>：低位+大户加仓';
+  else if (phase === '高位震荡' && longTrend < -2) verdict = '⚠️ <strong>出货信号</strong>：高位+大户减仓';
+  
+  document.getElementById('analysis').innerHTML = 
+    '<h3>📊 全局分析（' + history.length + '个数据点，' + Math.round((Date.now() - data.startTime)/60000) + '分钟）</h3>' +
+    '<div style="display:grid;gap:12px;margin-top:10px;">' +
+    '<div style="padding:10px;background:#21262d;border-radius:6px;"><strong>📈 价格</strong>（' + phase + '）<br>' + priceAnalysis + '</div>' +
+    (oiAnalysis ? '<div style="padding:10px;background:#21262d;border-radius:6px;"><strong>💰 OI</strong><br>' + oiAnalysis + '</div>' : '') +
+    (whaleAnalysis ? '<div style="padding:10px;background:#21262d;border-radius:6px;"><strong>🐋 大户</strong><br>' + whaleAnalysis + '</div>' : '') +
+    (takerAnalysis ? '<div style="padding:10px;background:#21262d;border-radius:6px;"><strong>⚡ 买卖</strong><br>' + takerAnalysis + '</div>' : '') +
+    '<div style="padding:12px;background:#1a1f29;border:1px solid #30363d;border-radius:6px;font-size:16px;">' + verdict + '</div></div>';
+}
+
+function showList() {
+  if (refreshTimer) clearInterval(refreshTimer);
+  document.getElementById('detail-view').classList.remove('active');
+  document.getElementById('list-view').style.display = 'block';
+  history.pushState({}, '', window.location.pathname);
+  loadList();
+}
+
+init();
+setInterval(() => { if (!document.getElementById('detail-view').classList.contains('active')) loadList(); }, 30000);
+</script>
 </body>
 </html>
