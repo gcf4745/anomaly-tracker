@@ -1,0 +1,51 @@
+{
+  "symbol": "XAGUSDT",
+  "trigger": {
+    "symbol": "XAGUSDT",
+    "price": "80.3300",
+    "change24h": "-0.372",
+    "change15m": "-0.21",
+    "volume": "60989006.4877",
+    "triggers": [
+      "大单 $196.8万"
+    ],
+    "triggerScore": 2,
+    "time": 1773591576730
+  },
+  "startTime": 1773591593970,
+  "endTime": 1773677993970,
+  "history": [
+    {
+      "time": 1773591595495,
+      "oi": {
+        "value": "1803094.13400000",
+        "usd": "145135779.48092633"
+      },
+      "longShort": {
+        "long": "0.6211",
+        "short": "0.3789"
+      },
+      "taker": {
+        "ratio": "0.4234",
+        "buy": "5081.2930",
+        "sell": "12001.6430"
+      },
+      "funding": "-0.00027546",
+      "liquidations": {
+        "longLiq": 0,
+        "shortLiq": 0,
+        "count": 0,
+        "total": 0
+      },
+      "premium": null,
+      "largeTrades": {
+        "largeBuy": 0,
+        "largeSell": 0,
+        "count": 0,
+        "total": 0
+      },
+      "orderBook": null
+    }
+  ],
+  "lastUpdate": 1773591595996
+}

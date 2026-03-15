@@ -11,7 +11,23 @@
         "time": 1773580716781
       },
       "startTime": 1773580719703
+    },
+    {
+      "symbol": "XAGUSDT",
+      "trigger": {
+        "symbol": "XAGUSDT",
+        "price": "80.3300",
+        "change24h": "-0.372",
+        "change15m": "-0.21",
+        "volume": "60989006.4877",
+        "triggers": [
+          "大单 $196.8万"
+        ],
+        "triggerScore": 2,
+        "time": 1773591576730
+      },
+      "startTime": 1773591593970
     }
   ],
-  "lastUpdate": 1773590667224
+  "lastUpdate": 1773591595996
 }
