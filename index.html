@@ -218,124 +218,46 @@
         // 绘制图表
         renderCharts(data);
         
-            // 生成分析
+                // 生成分析
     function generateAnalysis(data) {
       const history = data.history;
-      if (history.length < 2) {
-        document.getElementById('analysis').innerHTML = '<h3>📊 分析</h3><p>数据收集中，稍后刷新查看分析...</p>';
+      if (history.length < 3) {
+        document.getElementById('analysis').innerHTML = '<h3>📊 实时分析</h3><p>数据收集中（至少需要3个数据点）...</p>';
         return;
       }
       
-      const first = history[0];
-      const latest = history[history.length - 1];
       const trigger = data.trigger;
-      
-      let analysis = [];
-      
-      // 核心：从触发点开始算总变化
       const triggerPrice = parseFloat(trigger.price);
+      const prices = history.map(h => parseFloat(h.price)).filter(p => !isNaN(p));
+      const latest = history[history.length - 1];
       const currentPrice = parseFloat(latest.price);
-      const totalChange = ((currentPrice - triggerPrice) / triggerPrice * 100);
       
-      // 价格总览
-      if (totalChange > 5) {
-        analysis.push('📈 从触发点上涨 +' + totalChange.toFixed(1) + '%（
-    
-    // 返回列表
-    function showList() {
-      if (refreshTimer) clearInterval(refreshTimer);
-      document.getElementById('detail-view').classList.remove('active');
-      document.getElementById('list-view').style.display = 'block';
-      history.pushState({}, '', window.location.pathname);
-      loadList();
-    }
-    
-    // 启动
-    init();
-    
-    // 列表定时刷新
-    setInterval(() => {
-      if (!document.getElementById('detail-view').classList.contains('active')) {
-        loadList();
-      }
-    }, 30000);
-  </script>
-</body>
-</html>
- + trigger.price + ' → 
-    
-    // 返回列表
-    function showList() {
-      if (refreshTimer) clearInterval(refreshTimer);
-      document.getElementById('detail-view').classList.remove('active');
-      document.getElementById('list-view').style.display = 'block';
-      history.pushState({}, '', window.location.pathname);
-      loadList();
-    }
-    
-    // 启动
-    init();
-    
-    // 列表定时刷新
-    setInterval(() => {
-      if (!document.getElementById('detail-view').classList.contains('active')) {
-        loadList();
-      }
-    }, 30000);
-  </script>
-</body>
-</html>
- + latest.price + '）');
-      } else if (totalChange < -5) {
-        analysis.push('📉 从触发点下跌 ' + totalChange.toFixed(1) + '%（
-    
-    // 返回列表
-    function showList() {
-      if (refreshTimer) clearInterval(refreshTimer);
-      document.getElementById('detail-view').classList.remove('active');
-      document.getElementById('list-view').style.display = 'block';
-      history.pushState({}, '', window.location.pathname);
-      loadList();
-    }
-    
-    // 启动
-    init();
-    
-    // 列表定时刷新
-    setInterval(() => {
-      if (!document.getElementById('detail-view').classList.contains('active')) {
-        loadList();
-      }
-    }, 30000);
-  </script>
-</body>
-</html>
- + trigger.price + ' → 
-    
-    // 返回列表
-    function showList() {
-      if (refreshTimer) clearInterval(refreshTimer);
-      document.getElementById('detail-view').classList.remove('active');
-      document.getElementById('list-view').style.display = 'block';
-      history.pushState({}, '', window.location.pathname);
-      loadList();
-    }
-    
-    // 启动
-    init();
-    
-    // 列表定时刷新
-    setInterval(() => {
-      if (!document.getElementById('detail-view').classList.contains('active')) {
-        loadList();
-      }
-    }, 30000);
-  </script>
-</body>
-</html>
- + latest.price + '）');
+      // ========== 价格趋势分析 ==========
+      const maxPrice = Math.max(...prices);
+      const minPrice = Math.min(...prices);
+      const maxIdx = prices.indexOf(maxPrice);
+      const minIdx = prices.indexOf(minPrice);
+      
+      let priceAnalysis = '';
+      const fromTrigger = ((currentPrice - triggerPrice) / triggerPrice * 100).toFixed(1);
+      const fromMax = ((currentPrice - maxPrice) / maxPrice * 100).toFixed(1);
+      const fromMin = ((currentPrice - minPrice) / minPrice * 100).toFixed(1);
+      
+      // 判断当前阶段
+      let phase = '';
+      if (maxIdx > minIdx && currentPrice > (maxPrice + minPrice) / 2) {
+        phase = '反弹中';
+      } else if (maxIdx < minIdx && currentPrice < (maxPrice + minPrice) / 2) {
+        phase = '下跌中';
+      } else if (Math.abs(fromMax) < 3 && maxIdx > prices.length * 0.7) {
+        phase = '高位震荡';
+      } else if (Math.abs(fromMin) < 3 && minIdx > prices.length * 0.7) {
+        phase = '低位企稳';
       } else {
-        analysis.push('➡️ 价格基本持平（
+        phase = '震荡整理';
+      }
+      
+      priceAnalysis = '触发价 
     
     // 返回列表
     function showList() {
@@ -358,7 +280,7 @@
   </script>
 </body>
 </html>
- + trigger.price + ' → 
+ + trigger.price + ' → 最高 
     
     // 返回列表
     function showList() {
@@ -381,65 +303,225 @@
   </script>
 </body>
 </html>
- + latest.price + '）');
+ + maxPrice.toFixed(4) + ' → 最低 
+    
+    // 返回列表
+    function showList() {
+      if (refreshTimer) clearInterval(refreshTimer);
+      document.getElementById('detail-view').classList.remove('active');
+      document.getElementById('list-view').style.display = 'block';
+      history.pushState({}, '', window.location.pathname);
+      loadList();
+    }
+    
+    // 启动
+    init();
+    
+    // 列表定时刷新
+    setInterval(() => {
+      if (!document.getElementById('detail-view').classList.contains('active')) {
+        loadList();
+      }
+    }, 30000);
+  </script>
+</body>
+</html>
+ + minPrice.toFixed(4) + ' → 现价 
+    
+    // 返回列表
+    function showList() {
+      if (refreshTimer) clearInterval(refreshTimer);
+      document.getElementById('detail-view').classList.remove('active');
+      document.getElementById('list-view').style.display = 'block';
+      history.pushState({}, '', window.location.pathname);
+      loadList();
+    }
+    
+    // 启动
+    init();
+    
+    // 列表定时刷新
+    setInterval(() => {
+      if (!document.getElementById('detail-view').classList.contains('active')) {
+        loadList();
+      }
+    }, 30000);
+  </script>
+</body>
+</html>
+ + currentPrice.toFixed(4);
+      priceAnalysis += '<br>从触发点: ' + (fromTrigger > 0 ? '+' : '') + fromTrigger + '% | 距最高: ' + fromMax + '% | 距最低: +' + fromMin + '%';
+      
+      // ========== OI 趋势分析 ==========
+      let oiAnalysis = '';
+      const oiData = history.filter(h => h.oi && h.oi.usd).map(h => parseFloat(h.oi.usd));
+      if (oiData.length >= 2) {
+        const oiFirst = oiData[0];
+        const oiLatest = oiData[oiData.length - 1];
+        const oiMax = Math.max(...oiData);
+        const oiMin = Math.min(...oiData);
+        const oiChange = ((oiLatest - oiFirst) / oiFirst * 100).toFixed(1);
+        
+        // OI 趋势
+        const oiRecent = oiData.slice(-3);
+        const oiTrend = oiRecent[oiRecent.length - 1] > oiRecent[0] ? '↑' : '↓';
+        
+        oiAnalysis = 'OI: 
+    
+    // 返回列表
+    function showList() {
+      if (refreshTimer) clearInterval(refreshTimer);
+      document.getElementById('detail-view').classList.remove('active');
+      document.getElementById('list-view').style.display = 'block';
+      history.pushState({}, '', window.location.pathname);
+      loadList();
+    }
+    
+    // 启动
+    init();
+    
+    // 列表定时刷新
+    setInterval(() => {
+      if (!document.getElementById('detail-view').classList.contains('active')) {
+        loadList();
+      }
+    }, 30000);
+  </script>
+</body>
+</html>
+ + (oiFirst/1e6).toFixed(2) + 'M → 
+    
+    // 返回列表
+    function showList() {
+      if (refreshTimer) clearInterval(refreshTimer);
+      document.getElementById('detail-view').classList.remove('active');
+      document.getElementById('list-view').style.display = 'block';
+      history.pushState({}, '', window.location.pathname);
+      loadList();
+    }
+    
+    // 启动
+    init();
+    
+    // 列表定时刷新
+    setInterval(() => {
+      if (!document.getElementById('detail-view').classList.contains('active')) {
+        loadList();
+      }
+    }, 30000);
+  </script>
+</body>
+</html>
+ + (oiLatest/1e6).toFixed(2) + 'M (' + (oiChange > 0 ? '+' : '') + oiChange + '%) ' + oiTrend;
+        oiAnalysis += '<br>区间: 
+    
+    // 返回列表
+    function showList() {
+      if (refreshTimer) clearInterval(refreshTimer);
+      document.getElementById('detail-view').classList.remove('active');
+      document.getElementById('list-view').style.display = 'block';
+      history.pushState({}, '', window.location.pathname);
+      loadList();
+    }
+    
+    // 启动
+    init();
+    
+    // 列表定时刷新
+    setInterval(() => {
+      if (!document.getElementById('detail-view').classList.contains('active')) {
+        loadList();
+      }
+    }, 30000);
+  </script>
+</body>
+</html>
+ + (oiMin/1e6).toFixed(2) + 'M ~ 
+    
+    // 返回列表
+    function showList() {
+      if (refreshTimer) clearInterval(refreshTimer);
+      document.getElementById('detail-view').classList.remove('active');
+      document.getElementById('list-view').style.display = 'block';
+      history.pushState({}, '', window.location.pathname);
+      loadList();
+    }
+    
+    // 启动
+    init();
+    
+    // 列表定时刷新
+    setInterval(() => {
+      if (!document.getElementById('detail-view').classList.contains('active')) {
+        loadList();
+      }
+    }, 30000);
+  </script>
+</body>
+</html>
+ + (oiMax/1e6).toFixed(2) + 'M';
       }
       
-      // OI 总变化
-      if (first.oi && latest.oi) {
-        const oiFirst = parseFloat(first.oi.usd);
-        const oiLatest = parseFloat(latest.oi.usd);
-        const oiChange = ((oiLatest - oiFirst) / oiFirst * 100);
-        if (oiChange > 20) {
-          analysis.push('💰 OI 增加 +' + oiChange.toFixed(1) + '%（新资金入场）');
-        } else if (oiChange < -20) {
-          analysis.push('💸 OI 减少 ' + oiChange.toFixed(1) + '%（仓位离场）');
-        }
+      // ========== 大户多空分析 ==========
+      let whaleAnalysis = '';
+      const longData = history.filter(h => h.longShort).map(h => parseFloat(h.longShort.long) * 100);
+      if (longData.length >= 2) {
+        const longFirst = longData[0];
+        const longLatest = longData[longData.length - 1];
+        const longMax = Math.max(...longData);
+        const longMin = Math.min(...longData);
+        const longChange = (longLatest - longFirst).toFixed(1);
+        
+        // 趋势
+        const longRecent = longData.slice(-3);
+        const longTrend = longRecent[longRecent.length - 1] > longRecent[0] ? '↑ 加仓' : '↓ 减仓';
+        
+        whaleAnalysis = '大户多头: ' + longFirst.toFixed(1) + '% → ' + longLatest.toFixed(1) + '% (' + (longChange > 0 ? '+' : '') + longChange + '%) ' + longTrend;
+        whaleAnalysis += '<br>区间: ' + longMin.toFixed(1) + '% ~ ' + longMax.toFixed(1) + '%';
       }
       
-      // 大户多头变化
-      if (first.longShort && latest.longShort) {
-        const longFirst = parseFloat(first.longShort.long) * 100;
-        const longLatest = parseFloat(latest.longShort.long) * 100;
-        const longChange = longLatest - longFirst;
-        if (longChange > 3) {
-          analysis.push('🐋 大户多头增加 ' + longFirst.toFixed(1) + '% → ' + longLatest.toFixed(1) + '%');
-        } else if (longChange < -3) {
-          analysis.push('🐋 大户多头减少 ' + longFirst.toFixed(1) + '% → ' + longLatest.toFixed(1) + '%（可能出货）');
-        }
+      // ========== 主动买卖分析 ==========
+      let takerAnalysis = '';
+      const takerData = history.filter(h => h.taker).map(h => parseFloat(h.taker.ratio));
+      if (takerData.length >= 2) {
+        const buyDominant = takerData.filter(r => r > 1).length;
+        const sellDominant = takerData.filter(r => r < 1).length;
+        const latestRatio = takerData[takerData.length - 1];
+        
+        takerAnalysis = '买卖比: ' + (buyDominant > sellDominant ? '🟢 买方主导 (' + buyDominant + '/' + takerData.length + ')' : '🔴 卖方主导 (' + sellDominant + '/' + takerData.length + ')');
+        takerAnalysis += ' | 最新: ' + latestRatio.toFixed(3);
       }
       
-      // 近期主动买卖
-      const recentTaker = history.slice(-3);
-      const avgRatio = recentTaker.reduce((sum, h) => sum + (h.taker ? parseFloat(h.taker.ratio) : 1), 0) / recentTaker.length;
-      if (avgRatio > 1.2) {
-        analysis.push('🟢 近期主动买盘强');
-      } else if (avgRatio < 0.8) {
-        analysis.push('🔴 近期主动卖盘强');
-      }
-      
-      // 综合判断
+      // ========== 综合判断 ==========
       let verdict = '';
-      if (totalChange < -20 && first.longShort && latest.longShort) {
-        const longDrop = (parseFloat(first.longShort.long) - parseFloat(latest.longShort.long)) * 100;
-        if (longDrop > 5) {
-          verdict = '⚠️ <strong>疑似出货</strong>：价格暴跌 + 大户多头减仓';
-        }
-      }
-      if (totalChange > 20 && first.oi && latest.oi) {
-        const oiChange = ((parseFloat(latest.oi.usd) - parseFloat(first.oi.usd)) / parseFloat(first.oi.usd) * 100);
-        if (oiChange < -20) {
-          verdict = '✅ <strong>轧空行情</strong>：价格上涨 + OI 下降';
-        } else if (oiChange > 50) {
-          verdict = '⚠️ <strong>高杠杆拉盘</strong>：价格上涨 + OI 暴增（小心回调）';
-        }
+      const oiTrend = oiData.length >= 2 ? (oiData[oiData.length-1] - oiData[0]) / oiData[0] : 0;
+      const longTrend = longData.length >= 2 ? longData[longData.length-1] - longData[0] : 0;
+      
+      if (phase === '下跌中' && oiTrend > 0.1 && longTrend < -3) {
+        verdict = '⚠️ <strong>危险信号</strong>：价格下跌 + OI 增加 + 大户减仓 = 散户接盘中';
+      } else if (phase === '下跌中' && oiTrend < -0.1) {
+        verdict = '📉 <strong>多头止损</strong>：价格下跌 + OI 减少 = 多头平仓离场';
+      } else if (phase === '反弹中' && oiTrend < -0.1) {
+        verdict = '✅ <strong>空头回补</strong>：价格反弹 + OI 减少 = 空头平仓推动';
+      } else if (phase === '反弹中' && oiTrend > 0.2) {
+        verdict = '⚠️ <strong>高杠杆反弹</strong>：价格反弹 + OI 暴增 = 注意回调风险';
+      } else if (phase === '低位企稳' && longTrend > 2) {
+        verdict = '👀 <strong>抄底信号</strong>：低位企稳 + 大户加仓';
+      } else if (phase === '高位震荡' && longTrend < -2) {
+        verdict = '⚠️ <strong>出货信号</strong>：高位震荡 + 大户减仓';
+      } else {
+        verdict = '👀 <strong>观望</strong>：' + phase + '，等待明确方向';
       }
       
       document.getElementById('analysis').innerHTML = 
-        '<h3>📊 全局分析</h3>' +
-        '<p><strong>触发原因：</strong>' + (parseFloat(trigger.change15m) > 0 ? '🚀 暴涨' : '💥 暴跌') + ' ' + trigger.change15m + '%（15分钟）</p>' +
-        '<p><strong>追踪状态：</strong></p>' +
-        '<ul>' + analysis.map(a => '<li>' + a + '</li>').join('') + '</ul>' +
-        (verdict ? '<p style="margin-top:10px;padding:10px;background:#21262d;border-radius:6px;">' + verdict + '</p>' : '');
+        '<h3>📊 实时全局分析</h3>' +
+        '<div style="display:grid;gap:12px;margin-top:10px;">' +
+        '<div style="padding:10px;background:#21262d;border-radius:6px;"><strong>📈 价格走势</strong>（' + phase + '）<br>' + priceAnalysis + '</div>' +
+        (oiAnalysis ? '<div style="padding:10px;background:#21262d;border-radius:6px;"><strong>💰 持仓量(OI)</strong><br>' + oiAnalysis + '</div>' : '') +
+        (whaleAnalysis ? '<div style="padding:10px;background:#21262d;border-radius:6px;"><strong>🐋 大户动向</strong><br>' + whaleAnalysis + '</div>' : '') +
+        (takerAnalysis ? '<div style="padding:10px;background:#21262d;border-radius:6px;"><strong>⚡ 主动买卖</strong><br>' + takerAnalysis + '</div>' : '') +
+        '<div style="padding:12px;background:#1a1f29;border:1px solid #30363d;border-radius:6px;font-size:16px;">' + verdict + '</div>' +
+        '</div>';
     }
     
     // 返回列表
