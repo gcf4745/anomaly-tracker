@@ -54,7 +54,23 @@
       "premium": "-100.0000",
       "liqLong": "0",
       "liqShort": "0"
+    },
+    {
+      "time": 1773589194495,
+      "price": "71451.40",
+      "change24h": "1.290",
+      "volume24h": "5934536748.60",
+      "oi": "5889839527.69500000",
+      "longPct": "0.5075",
+      "shortPct": "0.4925",
+      "takerRatio": "0.9500",
+      "takerBuy": "211.4100",
+      "takerSell": "222.5460",
+      "funding": "-0.00006461",
+      "premium": "-0.0603",
+      "liqLong": "0",
+      "liqShort": "0"
     }
   ],
-  "lastUpdate": 1773588984893
+  "lastUpdate": 1773589194496
 }
