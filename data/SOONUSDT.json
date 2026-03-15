@@ -1,0 +1,56 @@
+{
+  "symbol": "SOONUSDT",
+  "trigger": {
+    "symbol": "SOONUSDT",
+    "price": 0.1478,
+    "change_pct": -2.2486772486772577,
+    "type": "price",
+    "triggers": [
+      "价格异动 -2.25%"
+    ],
+    "time": 1773609651663.022
+  },
+  "startTime": 1773609960407,
+  "endTime": 5373606360407,
+  "history": [
+    {
+      "time": 1773609974162,
+      "price": "0.1488000",
+      "oi": {
+        "value": "19433935.00000000",
+        "usd": "2968710.22571915"
+      },
+      "longShort": {
+        "long": "0.4817",
+        "short": "0.5183"
+      },
+      "taker": {
+        "ratio": "0.9305",
+        "buy": "12380.0000",
+        "sell": "13304.0000"
+      },
+      "funding": "-0.00028106",
+      "liquidations": {
+        "longLiq": 0,
+        "shortLiq": 0,
+        "count": 0,
+        "total": 0
+      },
+      "premium": null,
+      "largeTrades": {
+        "largeBuy": 0,
+        "largeSell": 0,
+        "count": 0,
+        "total": 0
+      },
+      "orderBook": {
+        "bidTotal": "35937.51",
+        "askTotal": "47069.98",
+        "ratio": "0.763",
+        "topBid": "0.1488000",
+        "topAsk": "0.1489000"
+      }
+    }
+  ],
+  "lastUpdate": 1773609976182
+}

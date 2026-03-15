@@ -167,7 +167,35 @@
         "time": 1773608884126.5046
       },
       "startTime": 1773609018817
+    },
+    {
+      "symbol": "SOONUSDT",
+      "trigger": {
+        "symbol": "SOONUSDT",
+        "price": 0.1478,
+        "change_pct": -2.2486772486772577,
+        "type": "price",
+        "triggers": [
+          "价格异动 -2.25%"
+        ],
+        "time": 1773609651663.022
+      },
+      "startTime": 1773609960407
+    },
+    {
+      "symbol": "BEATUSDT",
+      "trigger": {
+        "symbol": "BEATUSDT",
+        "price": 0.4057,
+        "change_pct": 2.1142713314875454,
+        "type": "price",
+        "triggers": [
+          "价格异动 +2.11%"
+        ],
+        "time": 1773609764362.5312
+      },
+      "startTime": 1773609961381
     }
   ],
-  "lastUpdate": 1773609659065
+  "lastUpdate": 1773609976183
 }

@@ -1,0 +1,56 @@
+{
+  "symbol": "BEATUSDT",
+  "trigger": {
+    "symbol": "BEATUSDT",
+    "price": 0.4057,
+    "change_pct": 2.1142713314875454,
+    "type": "price",
+    "triggers": [
+      "价格异动 +2.11%"
+    ],
+    "time": 1773609764362.5312
+  },
+  "startTime": 1773609961381,
+  "endTime": 5373606361381,
+  "history": [
+    {
+      "time": 1773609975176,
+      "price": "0.4005000",
+      "oi": {
+        "value": "21708509.00000000",
+        "usd": "8706248.11527597"
+      },
+      "longShort": {
+        "long": "0.6821",
+        "short": "0.3179"
+      },
+      "taker": {
+        "ratio": "0.9908",
+        "buy": "90940.0000",
+        "sell": "91789.0000"
+      },
+      "funding": "0.00005000",
+      "liquidations": {
+        "longLiq": 0,
+        "shortLiq": 0,
+        "count": 0,
+        "total": 0
+      },
+      "premium": null,
+      "largeTrades": {
+        "largeBuy": 0,
+        "largeSell": 0,
+        "count": 0,
+        "total": 0
+      },
+      "orderBook": {
+        "bidTotal": "23001.53",
+        "askTotal": "20219.49",
+        "ratio": "1.138",
+        "topBid": "0.4004000",
+        "topAsk": "0.4005000"
+      }
+    }
+  ],
+  "lastUpdate": 1773609976182
+}
