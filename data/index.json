@@ -41,7 +41,49 @@
         "time": 1773606466709.4167
       },
       "startTime": 1773606537258
+    },
+    {
+      "symbol": "PTBUSDT",
+      "trigger": {
+        "symbol": "PTBUSDT",
+        "price": 0.001415,
+        "change_pct": 2.1660649819494644,
+        "type": "price",
+        "triggers": [
+          "价格异动 +2.17%"
+        ],
+        "time": 1773606621486.1594
+      },
+      "startTime": 1773606842517
+    },
+    {
+      "symbol": "XANUSDT",
+      "trigger": {
+        "symbol": "XANUSDT",
+        "price": 0.01077,
+        "change_pct": 2.2500712047849554,
+        "type": "price",
+        "triggers": [
+          "价格异动 +2.25%"
+        ],
+        "time": 1773606678648.8862
+      },
+      "startTime": 1773606843434
+    },
+    {
+      "symbol": "REZUSDT",
+      "trigger": {
+        "symbol": "REZUSDT",
+        "price": 0.004615,
+        "change_pct": -2.037783909997872,
+        "type": "price",
+        "triggers": [
+          "价格异动 -2.04%"
+        ],
+        "time": 1773606681652.8806
+      },
+      "startTime": 1773606843875
     }
   ],
-  "lastUpdate": 1773606541286
+  "lastUpdate": 1773606850450
 }

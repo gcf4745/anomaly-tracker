@@ -1,0 +1,49 @@
+{
+  "symbol": "XANUSDT",
+  "trigger": {
+    "symbol": "XANUSDT",
+    "price": 0.01077,
+    "change_pct": 2.2500712047849554,
+    "type": "price",
+    "triggers": [
+      "价格异动 +2.25%"
+    ],
+    "time": 1773606678648.8862
+  },
+  "startTime": 1773606843434,
+  "endTime": 5373603243434,
+  "history": [
+    {
+      "time": 1773606848433,
+      "oi": {
+        "value": "652940793.00000000",
+        "usd": "6979284.13637700"
+      },
+      "longShort": {
+        "long": "0.5330",
+        "short": "0.4670"
+      },
+      "taker": {
+        "ratio": "0.9170",
+        "buy": "17267383.0000",
+        "sell": "18829466.0000"
+      },
+      "funding": "-0.00254400",
+      "liquidations": {
+        "longLiq": 0,
+        "shortLiq": 0,
+        "count": 0,
+        "total": 0
+      },
+      "premium": null,
+      "largeTrades": {
+        "largeBuy": 0,
+        "largeSell": 0,
+        "count": 0,
+        "total": 0
+      },
+      "orderBook": null
+    }
+  ],
+  "lastUpdate": 1773606850450
+}

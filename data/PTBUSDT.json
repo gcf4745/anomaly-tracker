@@ -1,0 +1,49 @@
+{
+  "symbol": "PTBUSDT",
+  "trigger": {
+    "symbol": "PTBUSDT",
+    "price": 0.001415,
+    "change_pct": 2.1660649819494644,
+    "type": "price",
+    "triggers": [
+      "价格异动 +2.17%"
+    ],
+    "time": 1773606621486.1594
+  },
+  "startTime": 1773606842517,
+  "endTime": 5373603242517,
+  "history": [
+    {
+      "time": 1773606847419,
+      "oi": {
+        "value": "3012621728.00000000",
+        "usd": "3964610.19404800"
+      },
+      "longShort": {
+        "long": "0.6245",
+        "short": "0.3755"
+      },
+      "taker": {
+        "ratio": "0.9815",
+        "buy": "38692804.0000",
+        "sell": "39421740.0000"
+      },
+      "funding": "0.00083598",
+      "liquidations": {
+        "longLiq": 0,
+        "shortLiq": 0,
+        "count": 0,
+        "total": 0
+      },
+      "premium": null,
+      "largeTrades": {
+        "largeBuy": 0,
+        "largeSell": 0,
+        "count": 0,
+        "total": 0
+      },
+      "orderBook": null
+    }
+  ],
+  "lastUpdate": 1773606850450
+}

@@ -1,0 +1,50 @@
+{
+  "symbol": "REZUSDT",
+  "trigger": {
+    "symbol": "REZUSDT",
+    "price": 0.004615,
+    "change_pct": -2.037783909997872,
+    "type": "price",
+    "triggers": [
+      "价格异动 -2.04%"
+    ],
+    "time": 1773606681652.8806
+  },
+  "startTime": 1773606843875,
+  "endTime": 5373603243875,
+  "history": [
+    {
+      "time": 1773606849447,
+      "price": "0.0046640",
+      "oi": {
+        "value": "1294564090.00000000",
+        "usd": "5608996.66966570"
+      },
+      "longShort": {
+        "long": "0.5104",
+        "short": "0.4896"
+      },
+      "taker": {
+        "ratio": "0.9854",
+        "buy": "235623388.0000",
+        "sell": "239126379.0000"
+      },
+      "funding": "-0.01149960",
+      "liquidations": {
+        "longLiq": 0,
+        "shortLiq": 0,
+        "count": 0,
+        "total": 0
+      },
+      "premium": "-5.0102",
+      "largeTrades": {
+        "largeBuy": 0,
+        "largeSell": 0,
+        "count": 0,
+        "total": 0
+      },
+      "orderBook": null
+    }
+  ],
+  "lastUpdate": 1773606850450
+}
