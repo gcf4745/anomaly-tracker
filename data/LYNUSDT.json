@@ -1,0 +1,50 @@
+{
+  "symbol": "LYNUSDT",
+  "trigger": {
+    "symbol": "LYNUSDT",
+    "price": 0.08573,
+    "change_pct": 5.254757519950898,
+    "type": "price",
+    "triggers": [
+      "价格异动 +5.25%"
+    ],
+    "time": 1773607441654.7043
+  },
+  "startTime": 1773607460990,
+  "endTime": 5373603860990,
+  "history": [
+    {
+      "time": 1773607469101,
+      "price": "0.0859500",
+      "oi": {
+        "value": "118456318.00000000",
+        "usd": "9979944.79150000"
+      },
+      "longShort": {
+        "long": "0.5524",
+        "short": "0.4476"
+      },
+      "taker": {
+        "ratio": "1.0905",
+        "buy": "1851330.0000",
+        "sell": "1697721.0000"
+      },
+      "funding": "-0.00243299",
+      "liquidations": {
+        "longLiq": 0,
+        "shortLiq": 0,
+        "count": 0,
+        "total": 0
+      },
+      "premium": null,
+      "largeTrades": {
+        "largeBuy": 0,
+        "largeSell": 0,
+        "count": 0,
+        "total": 0
+      },
+      "orderBook": null
+    }
+  ],
+  "lastUpdate": 1773607470103
+}

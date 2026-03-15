@@ -97,7 +97,21 @@
         "time": 1773607142677.5393
       },
       "startTime": 1773607151678
+    },
+    {
+      "symbol": "LYNUSDT",
+      "trigger": {
+        "symbol": "LYNUSDT",
+        "price": 0.08573,
+        "change_pct": 5.254757519950898,
+        "type": "price",
+        "triggers": [
+          "价格异动 +5.25%"
+        ],
+        "time": 1773607441654.7043
+      },
+      "startTime": 1773607460990
     }
   ],
-  "lastUpdate": 1773607159737
+  "lastUpdate": 1773607470104
 }
