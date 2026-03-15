@@ -118,7 +118,39 @@
       "premium": "-0.0481",
       "liqLong": "0",
       "liqShort": "0"
+    },
+    {
+      "time": 1773591895066,
+      "price": "71359.00",
+      "change24h": "1.098",
+      "volume24h": "5933843783.57",
+      "oi": "5870243373.25790000",
+      "longPct": "0.5071",
+      "shortPct": "0.4929",
+      "takerRatio": "0.6518",
+      "takerBuy": "427.3140",
+      "takerSell": "655.5830",
+      "funding": "0.00002659",
+      "premium": "-0.0462",
+      "liqLong": "0",
+      "liqShort": "0"
+    },
+    {
+      "time": 1773592195130,
+      "price": "71323.90",
+      "change24h": "0.991",
+      "volume24h": "5944744945.84",
+      "oi": "5863550853.34860000",
+      "longPct": "0.5069",
+      "shortPct": "0.4931",
+      "takerRatio": "0.6209",
+      "takerBuy": "86.4750",
+      "takerSell": "139.2810",
+      "funding": "0.00002659",
+      "premium": "-0.0954",
+      "liqLong": "0",
+      "liqShort": "0"
     }
   ],
-  "lastUpdate": 1773591294937
+  "lastUpdate": 1773592195130
 }
