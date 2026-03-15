@@ -41,7 +41,20 @@
       "premium": "-100.0000",
       "liqLong": "0",
       "liqShort": "0"
+    },
+    {
+      "time": 1773588984893,
+      "oi": "5889839527.69500000",
+      "longPct": "0.5075",
+      "shortPct": "0.4925",
+      "takerRatio": "0.3660",
+      "takerBuy": "85.2090",
+      "takerSell": "232.7910",
+      "funding": "-0.00006461",
+      "premium": "-100.0000",
+      "liqLong": "0",
+      "liqShort": "0"
     }
   ],
-  "lastUpdate": 1773588684846
+  "lastUpdate": 1773588984893
 }
