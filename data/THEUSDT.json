@@ -987,7 +987,44 @@
         "topBid": "0.2118000",
         "topAsk": "0.2119000"
       }
+    },
+    {
+      "time": 1773606235043,
+      "oi": {
+        "value": "29960463.90000000",
+        "usd": "6740270.57778966"
+      },
+      "longShort": {
+        "long": "0.6387",
+        "short": "0.3613"
+      },
+      "taker": {
+        "ratio": "0.7927",
+        "buy": "2398386.9000",
+        "sell": "3025511.2000"
+      },
+      "funding": "-0.00000434",
+      "liquidations": {
+        "longLiq": 0,
+        "shortLiq": 0,
+        "count": 0,
+        "total": 0
+      },
+      "premium": null,
+      "largeTrades": {
+        "largeBuy": 0,
+        "largeSell": 0,
+        "count": 0,
+        "total": 0
+      },
+      "orderBook": {
+        "bidTotal": "119977.43",
+        "askTotal": "107476.94",
+        "ratio": "1.116",
+        "topBid": "0.2091000",
+        "topAsk": "0.2092000"
+      }
     }
   ],
-  "lastUpdate": 1773605642887
+  "lastUpdate": 1773606236045
 }
