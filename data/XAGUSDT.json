@@ -865,7 +865,39 @@
         "total": 0
       },
       "orderBook": null
+    },
+    {
+      "time": 1773609019801,
+      "price": "80.3700",
+      "oi": {
+        "value": "1803188.01800000",
+        "usd": "144825685.24441826"
+      },
+      "longShort": {
+        "long": "0.6209",
+        "short": "0.3791"
+      },
+      "taker": {
+        "ratio": "1.3075",
+        "buy": "1817.3020",
+        "sell": "1389.9400"
+      },
+      "funding": "-0.00140524",
+      "liquidations": {
+        "longLiq": 0,
+        "shortLiq": 0,
+        "count": 0,
+        "total": 0
+      },
+      "premium": null,
+      "largeTrades": {
+        "largeBuy": 0,
+        "largeSell": 0,
+        "count": 0,
+        "total": 0
+      },
+      "orderBook": null
     }
   ],
-  "lastUpdate": 1773608717595
+  "lastUpdate": 1773609031953
 }

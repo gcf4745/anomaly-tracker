@@ -1,0 +1,49 @@
+{
+  "symbol": "USELESSUSDT",
+  "trigger": {
+    "symbol": "USELESSUSDT",
+    "price": 0.03931,
+    "change_pct": 2.024396574098095,
+    "type": "price",
+    "triggers": [
+      "价格异动 +2.02%"
+    ],
+    "time": 1773608884126.5046
+  },
+  "startTime": 1773609018817,
+  "endTime": 5373605418817,
+  "history": [
+    {
+      "time": 1773609030952,
+      "oi": {
+        "value": "81144281.00000000",
+        "usd": "3120456.06963765"
+      },
+      "longShort": {
+        "long": "0.6060",
+        "short": "0.3940"
+      },
+      "taker": {
+        "ratio": "0.4899",
+        "buy": "201618.0000",
+        "sell": "411563.0000"
+      },
+      "funding": "0.00005000",
+      "liquidations": {
+        "longLiq": 0,
+        "shortLiq": 0,
+        "count": 0,
+        "total": 0
+      },
+      "premium": null,
+      "largeTrades": {
+        "largeBuy": 0,
+        "largeSell": 0,
+        "count": 0,
+        "total": 0
+      },
+      "orderBook": null
+    }
+  ],
+  "lastUpdate": 1773609031956
+}

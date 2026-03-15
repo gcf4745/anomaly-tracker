@@ -153,7 +153,21 @@
         "time": 1773608468468.7896
       },
       "startTime": 1773608705464
+    },
+    {
+      "symbol": "USELESSUSDT",
+      "trigger": {
+        "symbol": "USELESSUSDT",
+        "price": 0.03931,
+        "change_pct": 2.024396574098095,
+        "type": "price",
+        "triggers": [
+          "价格异动 +2.02%"
+        ],
+        "time": 1773608884126.5046
+      },
+      "startTime": 1773609018817
     }
   ],
-  "lastUpdate": 1773608717598
+  "lastUpdate": 1773609031956
 }
