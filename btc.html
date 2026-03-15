@@ -1,0 +1,280 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>BTC 订单流看板 - 桥洞</title>
+  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+  <style>
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+    body { font-family: -apple-system, BlinkMacSystemFont, sans-serif; background: #0d1117; color: #c9d1d9; padding: 15px; }
+    .header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px; }
+    h1 { color: #f7931a; font-size: 28px; }
+    .price-box { text-align: right; }
+    .price { font-size: 36px; font-weight: bold; color: #fff; }
+    .change { font-size: 18px; }
+    .change.up { color: #3fb950; }
+    .change.down { color: #f85149; }
+    .grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 15px; margin-bottom: 20px; }
+    .card { background: #161b22; border: 1px solid #30363d; border-radius: 8px; padding: 15px; }
+    .card-title { color: #8b949e; font-size: 12px; margin-bottom: 8px; }
+    .card-value { color: #fff; font-size: 24px; font-weight: bold; }
+    .card-sub { color: #8b949e; font-size: 12px; margin-top: 5px; }
+    .signal { display: inline-block; padding: 2px 8px; border-radius: 4px; font-size: 12px; margin-left: 8px; }
+    .signal.bullish { background: rgba(63,185,80,0.2); color: #3fb950; }
+    .signal.bearish { background: rgba(248,81,73,0.2); color: #f85149; }
+    .signal.neutral { background: rgba(139,148,158,0.2); color: #8b949e; }
+    .charts { display: grid; grid-template-columns: 1fr 1fr; gap: 15px; }
+    @media (max-width: 900px) { .charts { grid-template-columns: 1fr; } }
+    .chart-box { background: #161b22; border: 1px solid #30363d; border-radius: 8px; padding: 15px; }
+    .chart-title { color: #8b949e; font-size: 14px; margin-bottom: 10px; }
+    .update-time { text-align: right; color: #8b949e; font-size: 12px; margin-top: 15px; }
+    .nav { margin-bottom: 15px; }
+    .nav a { color: #58a6ff; text-decoration: none; }
+    .alert-box { background: #1a1f29; border: 1px solid #f0883e; border-radius: 8px; padding: 15px; margin-bottom: 20px; }
+    .alert-title { color: #f0883e; font-weight: bold; margin-bottom: 8px; }
+  </style>
+</head>
+<body>
+  <div class="nav"><a href="./">← 返回异动列表</a></div>
+  
+  <div class="header">
+    <h1>₿ BTC 订单流看板</h1>
+    <div class="price-box">
+      <div class="price" id="price">--</div>
+      <div class="change" id="change">--</div>
+    </div>
+  </div>
+  
+  <div id="alerts"></div>
+  
+  <div class="grid">
+    <div class="card">
+      <div class="card-title">持仓量 (OI)</div>
+      <div class="card-value" id="oi">--</div>
+      <div class="card-sub" id="oi-change"></div>
+    </div>
+    <div class="card">
+      <div class="card-title">大户多空比</div>
+      <div class="card-value" id="long-short">--</div>
+      <div class="card-sub" id="long-short-trend"></div>
+    </div>
+    <div class="card">
+      <div class="card-title">主动买卖比</div>
+      <div class="card-value" id="taker">--</div>
+      <div class="card-sub" id="taker-trend"></div>
+    </div>
+    <div class="card">
+      <div class="card-title">资金费率</div>
+      <div class="card-value" id="funding">--</div>
+      <div class="card-sub" id="funding-signal"></div>
+    </div>
+    <div class="card">
+      <div class="card-title">期现价差</div>
+      <div class="card-value" id="premium">--</div>
+      <div class="card-sub" id="premium-signal"></div>
+    </div>
+    <div class="card">
+      <div class="card-title">订单簿比</div>
+      <div class="card-value" id="depth">--</div>
+      <div class="card-sub" id="depth-signal"></div>
+    </div>
+    <div class="card">
+      <div class="card-title">大单 (1min)</div>
+      <div class="card-value" id="large-trades">--</div>
+      <div class="card-sub" id="large-detail"></div>
+    </div>
+    <div class="card">
+      <div class="card-title">爆仓 (1min)</div>
+      <div class="card-value" id="liquidations">--</div>
+      <div class="card-sub" id="liq-detail"></div>
+    </div>
+  </div>
+  
+  <div class="charts">
+    <div class="chart-box"><div class="chart-title">价格 & OI</div><canvas id="chart-price-oi"></canvas></div>
+    <div class="chart-box"><div class="chart-title">大户多空比</div><canvas id="chart-long-short"></canvas></div>
+    <div class="chart-box"><div class="chart-title">主动买卖比</div><canvas id="chart-taker"></canvas></div>
+    <div class="chart-box"><div class="chart-title">资金费率 & 期现差</div><canvas id="chart-funding"></canvas></div>
+  </div>
+  
+  <div class="update-time" id="update-time"></div>
+
+<script>
+const DATA_URL = './data/BTCUSDT.json';
+let charts = {};
+
+async function loadData() {
+  try {
+    const resp = await fetch(DATA_URL + '?t=' + Date.now());
+    const data = await resp.json();
+    
+    if (!data.history || data.history.length === 0) {
+      document.getElementById('price').textContent = '数据加载中...';
+      return;
+    }
+    
+    const latest = data.history[data.history.length - 1];
+    const prev = data.history.length > 1 ? data.history[data.history.length - 2] : latest;
+    const hour1Ago = data.history[Math.max(0, data.history.length - 60)] || latest;
+    
+    // 价格
+    const price = parseFloat(latest.price);
+    document.getElementById('price').textContent = '$' + price.toLocaleString('en-US', {minimumFractionDigits: 1});
+    const change = parseFloat(latest.change24h);
+    document.getElementById('change').textContent = (change > 0 ? '+' : '') + change + '% (24h)';
+    document.getElementById('change').className = 'change ' + (change > 0 ? 'up' : 'down');
+    
+    // OI
+    if (latest.oi) {
+      const oiB = (parseFloat(latest.oi.usd) / 1e9).toFixed(2);
+      document.getElementById('oi').textContent = '$' + oiB + 'B';
+      if (hour1Ago.oi) {
+        const oiChange = ((parseFloat(latest.oi.usd) - parseFloat(hour1Ago.oi.usd)) / parseFloat(hour1Ago.oi.usd) * 100).toFixed(2);
+        document.getElementById('oi-change').textContent = '1h: ' + (oiChange > 0 ? '+' : '') + oiChange + '%';
+      }
+    }
+    
+    // 大户多空
+    if (latest.longShort) {
+      const longPct = (parseFloat(latest.longShort.long) * 100).toFixed(1);
+      document.getElementById('long-short').innerHTML = longPct + '%<span class="signal ' + (longPct > 52 ? 'bullish' : longPct < 48 ? 'bearish' : 'neutral') + '">' + (longPct > 52 ? '偏多' : longPct < 48 ? '偏空' : '均衡') + '</span>';
+      if (hour1Ago.longShort) {
+        const trend = parseFloat(latest.longShort.long) - parseFloat(hour1Ago.longShort.long);
+        document.getElementById('long-short-trend').textContent = '1h: ' + (trend > 0 ? '↑加仓' : '↓减仓');
+      }
+    }
+    
+    // 买卖比
+    if (latest.taker) {
+      const ratio = parseFloat(latest.taker.ratio).toFixed(3);
+      document.getElementById('taker').innerHTML = ratio + '<span class="signal ' + (ratio > 1.05 ? 'bullish' : ratio < 0.95 ? 'bearish' : 'neutral') + '">' + (ratio > 1.05 ? '买盘强' : ratio < 0.95 ? '卖盘强' : '均衡') + '</span>';
+    }
+    
+    // 资金费率
+    if (latest.funding) {
+      const rate = (parseFloat(latest.funding) * 100).toFixed(4);
+      document.getElementById('funding').textContent = rate + '%';
+      let signal = '正常';
+      if (parseFloat(rate) > 0.05) signal = '多头拥挤';
+      else if (parseFloat(rate) < -0.01) signal = '空头拥挤';
+      document.getElementById('funding-signal').innerHTML = '<span class="signal ' + (parseFloat(rate) > 0.05 ? 'bearish' : parseFloat(rate) < -0.01 ? 'bullish' : 'neutral') + '">' + signal + '</span>';
+    }
+    
+    // 期现价差
+    if (latest.premium) {
+      document.getElementById('premium').textContent = latest.premium + '%';
+      const prem = parseFloat(latest.premium);
+      document.getElementById('premium-signal').innerHTML = '<span class="signal ' + (prem > 0.05 ? 'bullish' : prem < -0.05 ? 'bearish' : 'neutral') + '">' + (prem > 0.05 ? '期货溢价' : prem < -0.05 ? '期货折价' : '正常') + '</span>';
+    }
+    
+    // 订单簿
+    if (latest.orderBook) {
+      const ratio = parseFloat(latest.orderBook.ratio).toFixed(2);
+      document.getElementById('depth').textContent = ratio;
+      document.getElementById('depth-signal').innerHTML = '<span class="signal ' + (ratio > 1.2 ? 'bullish' : ratio < 0.8 ? 'bearish' : 'neutral') + '">' + (ratio > 1.2 ? '买盘厚' : ratio < 0.8 ? '卖盘厚' : '均衡') + '</span>';
+    }
+    
+    // 大单
+    if (latest.largeTrades) {
+      const total = (parseFloat(latest.largeTrades.buy) + parseFloat(latest.largeTrades.sell)) / 1e6;
+      document.getElementById('large-trades').textContent = total > 0 ? '$' + total.toFixed(2) + 'M' : '-';
+      document.getElementById('large-detail').textContent = '买 $' + (parseFloat(latest.largeTrades.buy)/1e6).toFixed(2) + 'M / 卖 $' + (parseFloat(latest.largeTrades.sell)/1e6).toFixed(2) + 'M';
+    }
+    
+    // 爆仓
+    if (latest.liquidations) {
+      const total = (parseFloat(latest.liquidations.long) + parseFloat(latest.liquidations.short)) / 1e6;
+      document.getElementById('liquidations').textContent = total > 0 ? '$' + total.toFixed(2) + 'M' : '-';
+      document.getElementById('liq-detail').textContent = '多爆 $' + (parseFloat(latest.liquidations.long)/1e6).toFixed(2) + 'M / 空爆 $' + (parseFloat(latest.liquidations.short)/1e6).toFixed(2) + 'M';
+    }
+    
+    // 智能提醒
+    let alerts = [];
+    if (latest.funding && Math.abs(parseFloat(latest.funding) * 100) > 0.08) {
+      alerts.push('⚠️ 资金费率极端: ' + (parseFloat(latest.funding) * 100).toFixed(4) + '% — ' + (parseFloat(latest.funding) > 0 ? '多头过度拥挤' : '空头过度拥挤'));
+    }
+    if (latest.liquidations && (parseFloat(latest.liquidations.long) + parseFloat(latest.liquidations.short)) > 5000000) {
+      alerts.push('🔥 大规模爆仓: $' + ((parseFloat(latest.liquidations.long) + parseFloat(latest.liquidations.short))/1e6).toFixed(2) + 'M');
+    }
+    if (latest.largeTrades && (parseFloat(latest.largeTrades.buy) + parseFloat(latest.largeTrades.sell)) > 10000000) {
+      alerts.push('🐋 大单异动: $' + ((parseFloat(latest.largeTrades.buy) + parseFloat(latest.largeTrades.sell))/1e6).toFixed(2) + 'M');
+    }
+    
+    document.getElementById('alerts').innerHTML = alerts.length > 0 ? 
+      '<div class="alert-box"><div class="alert-title">⚡ 实时信号</div>' + alerts.join('<br>') + '</div>' : '';
+    
+    // 图表
+    renderCharts(data.history);
+    
+    document.getElementById('update-time').textContent = '更新: ' + new Date(data.lastUpdate).toLocaleString();
+  } catch (e) {
+    console.error('加载失败:', e);
+  }
+}
+
+function renderCharts(history) {
+  // 取最近60个点（1小时）
+  const recent = history.slice(-60);
+  const labels = recent.map(h => new Date(h.time).toLocaleTimeString('zh-CN', {hour:'2-digit', minute:'2-digit'}));
+  
+  Object.values(charts).forEach(c => c.destroy());
+  charts = {};
+  
+  const opts = {
+    responsive: true,
+    plugins: { legend: { labels: { color: '#c9d1d9' } } },
+    scales: { x: { ticks: { color: '#8b949e' }, grid: { color: '#30363d' } }, y: { ticks: { color: '#8b949e' }, grid: { color: '#30363d' } } }
+  };
+  
+  charts.priceOi = new Chart(document.getElementById('chart-price-oi'), {
+    type: 'line',
+    data: {
+      labels,
+      datasets: [
+        { label: '价格', data: recent.map(h => parseFloat(h.price)), borderColor: '#f7931a', yAxisID: 'y', tension: 0.1, pointRadius: 0 },
+        { label: 'OI(B)', data: recent.map(h => h.oi ? parseFloat(h.oi.usd)/1e9 : null), borderColor: '#58a6ff', yAxisID: 'y1', tension: 0.1, pointRadius: 0 }
+      ]
+    },
+    options: { ...opts, scales: { ...opts.scales, y: { position: 'left', ticks: { color: '#8b949e' }, grid: { color: '#30363d' } }, y1: { position: 'right', ticks: { color: '#8b949e' }, grid: { display: false } } } }
+  });
+  
+  charts.longShort = new Chart(document.getElementById('chart-long-short'), {
+    type: 'line',
+    data: {
+      labels,
+      datasets: [
+        { label: '多头%', data: recent.map(h => h.longShort ? parseFloat(h.longShort.long)*100 : null), borderColor: '#3fb950', fill: true, backgroundColor: 'rgba(63,185,80,0.1)', pointRadius: 0 },
+        { label: '空头%', data: recent.map(h => h.longShort ? parseFloat(h.longShort.short)*100 : null), borderColor: '#f85149', fill: true, backgroundColor: 'rgba(248,81,73,0.1)', pointRadius: 0 }
+      ]
+    },
+    options: opts
+  });
+  
+  charts.taker = new Chart(document.getElementById('chart-taker'), {
+    type: 'bar',
+    data: {
+      labels,
+      datasets: [{ label: '买卖比', data: recent.map(h => h.taker ? parseFloat(h.taker.ratio) : null), backgroundColor: recent.map(h => !h.taker ? '#30363d' : parseFloat(h.taker.ratio) > 1 ? '#3fb950' : '#f85149') }]
+    },
+    options: opts
+  });
+  
+  charts.funding = new Chart(document.getElementById('chart-funding'), {
+    type: 'line',
+    data: {
+      labels,
+      datasets: [
+        { label: '费率%', data: recent.map(h => h.funding ? parseFloat(h.funding)*100 : null), borderColor: '#a371f7', yAxisID: 'y', tension: 0.1, pointRadius: 0 },
+        { label: '期现差%', data: recent.map(h => h.premium ? parseFloat(h.premium) : null), borderColor: '#f0883e', yAxisID: 'y1', tension: 0.1, pointRadius: 0 }
+      ]
+    },
+    options: { ...opts, scales: { ...opts.scales, y: { position: 'left', ticks: { color: '#8b949e' }, grid: { color: '#30363d' } }, y1: { position: 'right', ticks: { color: '#8b949e' }, grid: { display: false } } } }
+  });
+}
+
+loadData();
+setInterval(loadData, 60000);
+</script>
+</body>
+</html>
